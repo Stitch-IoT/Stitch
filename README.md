@@ -1,5 +1,3 @@
 # Stitch
 
-testing commits
-
-test
+Mobile app for people with hearing disability
