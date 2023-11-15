@@ -32,5 +32,3 @@ def listen_for_command():
 # Continuously listen for commands
 while True:
     listen_for_command()
-asdasd
-asdasd
