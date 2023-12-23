@@ -22,7 +22,7 @@ def listen_for_command():
         if any(word in command for word in trigger_words):
             start_program()
             return True  # Return True to indicate that the function has been executed
-
+        
         else:
             print("Команда не визначена.")
 
