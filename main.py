@@ -1,19 +1,18 @@
-from kivymd.app import MDApp
+
+import kivy.core.window
 from kivy.lang import Builder
-from kivy.core.window import Window
-from kivymd.uix.behaviors import FakeRectangularElevationBehavior
-from kivymd.uix.floatlayout import MDFloatLayout
-from kivymd.uix.list import OneLineListItem
-from kivymd.uix.list import IRightBodyTouch
-from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.dialog import MDDialog
-from kivymd.uix.button import MDFlatButton
-from kivymd.uix.textfield import MDTextField
-from kivymd.uix.button import MDIconButton
+from kivymd.app import MDApp
 from kivymd.toast.kivytoast.kivytoast import toast
+from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.uix.button import MDFlatButton
+from kivymd.uix.dialog import MDDialog
+from kivymd.uix.floatlayout import MDFloatLayout
+from kivymd.uix.list import IRightBodyTouch
+from kivymd.uix.list import MDList, OneLineListItem
+from kivymd.uix.bottomnavigation import MDBottomNavigationItem
 
 
-Window.size = (360, 600)
+kivy.core.window.Window.size = (360, 600)
 
 kv = """
 
@@ -24,122 +23,165 @@ kv = """
     height: "120dp"
 
     MDTextField:
+    	id : text_input
         hint_text: "here"
         line_color_normal: "black"
         pos_hint : {"center_x":.5, "center_y":.5}
+        
 
 
 MDFloatLayout:
-
 	MDBottomNavigation:
+		text_color_normal: 0, 0, 0, 1
+		text_color_active: 57/255, 93/255, 203/255, 1
+		spacing : 90
+		id : bottom_nav
     	MDBottomNavigationItem:
 
 	        icon : 'home'
-	        id : screen1
+	        id : home_screen
 			name : "home"
 
-			MDScrollView:
-				bar_width:0
 
-				MDList:
-					OneLineAvatarIconListItem:
-						text: "Name"
-						on_size:
-					    	self.ids._right_container.width = container.width
-					    	self.ids._right_container.x = container.width
+			MDList:
+				id : name_list
+				spacing : 0
+				pos_hint : {"center_y": .9}
+				padding : 0
+				OneLineAvatarIconListItem:
+					text: "Костянтин"
+					on_size:
+				    	self.ids._right_container.width = container.width
+				    	self.ids._right_container.x = container.width
 
+				    YourContainer:
+					    adaptive_width : True
+						id: container
+
+					    MDIconButton:
+					        icon: "pencil"
+
+					    MDIconButton:
+					        icon: "delete"
+					        on_press :
+					            app.delete_name()
 						
-
-						YourContainer:
-							adaptive_width : True
-					    	id: container
-
-					    	MDIconButton:
-					        	icon: "pencil"
-					
-
-					    	MDIconButton:
-					        	icon: "delete"
-					        	on_press :
-					        		app.delete_name()
+							
 
 			MDBoxLayout:
+				pos_hint : {"center_x": .5, "center_y": .05}
 				adaptive_size:True
-				pos_hint : {"center_x": .5, "center_y": .1}
 				MDIconButton:
-					icon_width: root.width*0.4
 					id : plus
 					icon : "plus"
 					icon_size : 45
 					adaptive_size:True
 					on_press:
-						app.add_sound()
+						app.add_name()
+
+		MDBottomNavigationItem:
+		    icon : 'play-circle'
+			id : screen2
+			name : "play"
+			MDFloatLayout:
+				MDLabel:
+					id : detecting_label
+					adaptive_size: True
+					text : "Start detecting"
+					pos_hint : {"center_x":.5, "center_y":.6}
+					font_size : "28dp"
+				MDIconButton:
+					id: detecting_button
+					icon : "play"
+					icon_size: "60sp"
+					adaptive_size: True
+					pos_hint : {"center_x":.5, "center_y":.4}
+					on_press: 
+						detecting_button.icon = 'pause' if detecting_button.icon == 'play' else 'play'
+						detecting_label.text = 'Stop detecting' if detecting_label.text == 'Start detecting' else 'Start detecting'
 
 
-	    MDBottomNavigationItem:
-	        icon : 'information'
-	        MDScreen:
-				id : screen2
-				name : "settings"
+		MDBottomNavigationItem:
+	        icon : 'account-voice'
+			id : screen3
+			name : "translation"
+			
+			MDRectangleFlatIconButton:
+				text : 'plus'
+				icon : 'play'
+			MDFlatButton:
+				text : 'minus'
 
-	
-
-
+			
 
 """
+
+
 class Content(MDFloatLayout):
-    pass
+	pass
 
 
 class Main(MDApp):
+	current_icon = "play"
 
 	def build(self):
 		return Builder.load_string(kv)
-
-	def add_sound(self):
-		add_name_button = MDIconButton(icon = "account", pos_hint= {'center_x': .5, 'center_y': .5})
-		add_alarm_button = MDIconButton(icon = "alarm-light")
-		self.dialog = MDDialog(buttons=[add_name_button, add_alarm_button])
-		self.dialog.open()
-
+ 
+      
 	def add_name(self):
 		close_button = MDFlatButton(text='Close', on_release=self.close_dialog)
 		save_button = MDFlatButton(text='Save', on_release=self.save_name)
-		self.dialog = MDDialog(title='Write the name',type="custom",content_cls=Content(),
-	                               buttons=[close_button, save_button])
+		self.dialog = MDDialog(title='Write a name or a phrase', type="custom", content_cls=Content(),
+                               buttons=[close_button, save_button])
 		self.dialog.open()
 
-	def close_dialog(self,obj):
+	def close_dialog(self, obj):
 		self.dialog.dismiss()
 
-	def save_name(self,obj):
-		self.dialog.dismiss()
-		toast("Name saved", duration = 3)
+	def save_name(self, obj):
+	    self.dialog.dismiss()
+	    toast("Name saved", duration=3)
 
-		
+	    home_screen = self.root.ids.bottom_nav.ids.home_screen
+	    list_container = home_screen.ids.name_list
+
+	    if list_container is not None:
+	        new_item_text = self.dialog.content_cls.ids.text_input.text
+	        new_list_item = OneLineListItem(text=new_item_text)
+	        list_container.add_widget(new_list_item)
+	        print(f"Added new item to list_container: {new_item_text}")
+	    else:
+	        print("Error: MDList 'name_list' not found.")
+
+
+
+
+
+
+
 
 	def delete_name(self):
-		cancel_button = MDFlatButton(text='Cancel', on_release=self.deleting_cancel_button)
-		admit_button = MDFlatButton(text='Admit', on_release=self.deleting_admit_button)
+		cancel_button = MDFlatButton(text='Cancel', on_release=self.cancel_deleting_button)
+		admit_button = MDFlatButton(text='Admit', on_release=self.admit_deleting_button)
 		self.dialog = MDDialog(title='Delete the name?',
-	                               buttons=[cancel_button, admit_button])
+                               buttons=[cancel_button, admit_button])
 		self.dialog.open()
 
-	def deleting_cancel_button(self,obj):
+	def cancel_deleting_button(self, obj):
 		self.dialog.dismiss()
 
-	def deleting_admit_button(self,obj):
+	def admit_deleting_button(self, obj):
 		self.dialog.dismiss()
-		toast("Name deleted", duration = 3)
-
+		toast("Name deleted", duration=3)
 
 
 class YourContainer(IRightBodyTouch, MDBoxLayout):
-	pass
-	#adaptive_width = True
-	#edit_button = MDIconButton(icon='pencil', on_release=close_dialog)
-	#delete_button = MDIconButton(icon='delete', on_release = app.delete_name)
+    pass
 
+
+# adaptive_width = True
+# edit_button = MDIconButton(icon='pencil', on_release=close_dialog)
+# delete_button = MDIconButton(icon='delete', on_release = app.delete_name)
 
 
 if __name__ == "__main__":
