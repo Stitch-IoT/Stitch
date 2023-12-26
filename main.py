@@ -1,15 +1,15 @@
-
 import kivy.core.window
 from kivy.lang import Builder
 from kivymd.app import MDApp
 from kivymd.toast.kivytoast.kivytoast import toast
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDFlatButton
+from kivymd.uix.button import MDFlatButton, MDIconButton
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.floatlayout import MDFloatLayout
 from kivymd.uix.list import IRightBodyTouch
-from kivymd.uix.list import MDList, OneLineListItem
+from kivymd.uix.list import MDList, OneLineListItem, OneLineAvatarIconListItem
 from kivymd.uix.bottomnavigation import MDBottomNavigationItem
+
 
 
 kivy.core.window.Window.size = (360, 600)
@@ -24,7 +24,6 @@ kv = """
 
     MDTextField:
     	id : text_input
-        hint_text: "here"
         line_color_normal: "black"
         pos_hint : {"center_x":.5, "center_y":.5}
         
@@ -37,34 +36,16 @@ MDFloatLayout:
 		spacing : 90
 		id : bottom_nav
     	MDBottomNavigationItem:
-
 	        icon : 'home'
 	        id : home_screen
 			name : "home"
-
-
-			MDList:
-				id : name_list
-				spacing : 0
-				pos_hint : {"center_y": .9}
-				padding : 0
-				OneLineAvatarIconListItem:
-					text: "Костянтин"
-					on_size:
-				    	self.ids._right_container.width = container.width
-				    	self.ids._right_container.x = container.width
-
-				    YourContainer:
-					    adaptive_width : True
-						id: container
-
-					    MDIconButton:
-					        icon: "pencil"
-
-					    MDIconButton:
-					        icon: "delete"
-					        on_press :
-					            app.delete_name()
+			MDScrollView:
+				MDList:
+					id : list_of_names
+					spacing : 0
+					pos_hint : {"center_y": .9}
+					padding : 0
+	
 						
 							
 
@@ -139,40 +120,38 @@ class Main(MDApp):
 		self.dialog.dismiss()
 
 	def save_name(self, obj):
-	    self.dialog.dismiss()
+	    new_item_text = self.dialog.content_cls.ids.text_input.text
+	    new_list_item = OneLineAvatarIconListItem(text=new_item_text)
+
+	    # edit_button = MDIconButton(icon="pencil", on_release=self.edit_name)
+	    delete_name_button = MDIconButton(icon="delete", on_release=self.delete_name)
+	    new_list_item.add_widget(delete_name_button)
+
+	    list_container = self.root.ids.list_of_names
+	    list_container.add_widget(new_list_item)
+
 	    toast("Name saved", duration=3)
-
-	    home_screen = self.root.ids.bottom_nav.ids.home_screen
-	    list_container = home_screen.ids.name_list
-
-	    if list_container is not None:
-	        new_item_text = self.dialog.content_cls.ids.text_input.text
-	        new_list_item = OneLineListItem(text=new_item_text)
-	        list_container.add_widget(new_list_item)
-	        print(f"Added new item to list_container: {new_item_text}")
-	    else:
-	        print("Error: MDList 'name_list' not found.")
+	    self.dialog.dismiss()
 
 
+	
+	def delete_name(self, list_item):
+	    cancel_deleting_button = MDFlatButton(text='Cancel', on_release=self.cancel_deleting)
+	    admit_deleting_button = MDFlatButton(text='Admit', on_release=lambda x, item=list_item: self.admit_deleting(x, item))
+	    self.dialog = MDDialog(title='Delete the name?',
+	                           buttons=[cancel_deleting_button, admit_deleting_button])
+	    self.dialog.open()		
 
 
-
-
-
-
-	def delete_name(self):
-		cancel_button = MDFlatButton(text='Cancel', on_release=self.cancel_deleting_button)
-		admit_button = MDFlatButton(text='Admit', on_release=self.admit_deleting_button)
-		self.dialog = MDDialog(title='Delete the name?',
-                               buttons=[cancel_button, admit_button])
-		self.dialog.open()
-
-	def cancel_deleting_button(self, obj):
+	def cancel_deleting(self, obj):
 		self.dialog.dismiss()
 
-	def admit_deleting_button(self, obj):
-		self.dialog.dismiss()
-		toast("Name deleted", duration=3)
+	def admit_deleting(self, obj, list_item):
+	    list_container = self.root.ids.list_of_names
+	    list_container.remove_widget(list_item)
+	    self.dialog.dismiss()
+	    toast("Name deleted", duration=3)
+
 
 
 class YourContainer(IRightBodyTouch, MDBoxLayout):
