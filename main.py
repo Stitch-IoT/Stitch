@@ -33,32 +33,29 @@ MDFloatLayout:
 	MDBottomNavigation:
 		text_color_normal: 0, 0, 0, 1
 		text_color_active: 57/255, 93/255, 203/255, 1
-		spacing : 90
+		spacing : 0
 		id : bottom_nav
     	MDBottomNavigationItem:
 	        icon : 'home'
 	        id : home_screen
 			name : "home"
 			MDScrollView:
+				size: self.size
 				MDList:
 					id : list_of_names
-					spacing : 0
-					pos_hint : {"center_y": .9}
-					padding : 0
-	
+					
 						
-							
-
-			MDBoxLayout:
-				pos_hint : {"center_x": .5, "center_y": .05}
+			
+			MDIconButton:
+				pos_hint: {"center_x": .5, "center_y": .1}
+				spacing : 50
+				id : plus
+				icon : "plus"
+				icon_size : 45
 				adaptive_size:True
-				MDIconButton:
-					id : plus
-					icon : "plus"
-					icon_size : 45
-					adaptive_size:True
-					on_press:
-						app.add_name()
+				on_press:
+					app.add_name()
+
 
 		MDBottomNavigationItem:
 		    icon : 'play-circle'
@@ -120,37 +117,43 @@ class Main(MDApp):
 		self.dialog.dismiss()
 
 	def save_name(self, obj):
+
 	    new_item_text = self.dialog.content_cls.ids.text_input.text
-	    new_list_item = OneLineAvatarIconListItem(text=new_item_text)
+	    if len(new_item_text) < 1:
+	    	toast("Field is empty", duration=2)
+	    else:
+		    new_list_item = OneLineAvatarIconListItem(text=new_item_text)
 
-	    # edit_button = MDIconButton(icon="pencil", on_release=self.edit_name)
-	    delete_name_button = MDIconButton(icon="delete", on_release=self.delete_name)
-	    new_list_item.add_widget(delete_name_button)
+		    # edit_button = MDIconButton(icon="pencil", on_release=self.edit_name)
+		    delete_name_button = MDIconButton(icon="delete", on_release=lambda x, item=new_list_item: self.delete_name(item))
+		    new_list_item.add_widget(delete_name_button)
 
-	    list_container = self.root.ids.list_of_names
-	    list_container.add_widget(new_list_item)
+		    list_container = self.root.ids.list_of_names
+		    list_container.add_widget(new_list_item)
 
-	    toast("Name saved", duration=3)
-	    self.dialog.dismiss()
+		    toast("Name saved", duration=2)
+		    self.dialog.dismiss()
 
 
 	
 	def delete_name(self, list_item):
 	    cancel_deleting_button = MDFlatButton(text='Cancel', on_release=self.cancel_deleting)
-	    admit_deleting_button = MDFlatButton(text='Admit', on_release=lambda x, item=list_item: self.admit_deleting(x, item))
+	    admit_deleting_button = MDFlatButton(text='Admit', on_release=lambda x, item=list_item: self.admit_deleting(item))
 	    self.dialog = MDDialog(title='Delete the name?',
 	                           buttons=[cancel_deleting_button, admit_deleting_button])
-	    self.dialog.open()		
+	    self.dialog.open()
+
+	def admit_deleting(self, list_item):
+	    list_container = self.root.ids.list_of_names
+	    list_container.remove_widget(list_item)
+	    self.dialog.dismiss()
+	    toast("Name deleted", duration=2)		
 
 
 	def cancel_deleting(self, obj):
 		self.dialog.dismiss()
 
-	def admit_deleting(self, obj, list_item):
-	    list_container = self.root.ids.list_of_names
-	    list_container.remove_widget(list_item)
-	    self.dialog.dismiss()
-	    toast("Name deleted", duration=3)
+	
 
 
 
