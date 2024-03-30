@@ -87,42 +87,34 @@ class Main(MDApp):
 
     def start_listening_thread(self):
         self.is_listening = True
-        threading.Thread(target=self.listen_for_command).start()
+        if self.is_listening:
+            self.thread = threading.Thread(target=self.listen_for_command)
+            self.thread.start()
+
+    def stop_listening(self):
+        self.is_listening = False  # Встановлення флагу для вимкнення прослуховування
+        if hasattr(self, 'thread') and self.thread is not None and self.thread.is_alive():
+            self.thread.join()
 
     def listen_for_command(self):
+        while self.is_listening:
+            with sr.Microphone() as source:
+                self.recognizer.adjust_for_ambient_noise(source)
+                audio = self.recognizer.listen(source, timeout=4)
 
-        recognizer = sr.Recognizer()
+            try:
+                command = self.recognizer.recognize_google(audio, language="uk-UA")
+                Clock.schedule_once(lambda dt: toast(f"Отримано команду: {command}", duration=3), 0)
 
-        if not self.listen_for_command:
-            return
-
-        with sr.Microphone() as source:
-            recognizer.adjust_for_ambient_noise(source)
-            audio = recognizer.listen(source)
-
-        try:
-            # Recognize the speech using Google Speech Recognition with Ukrainian language
-            command = recognizer.recognize_google(audio, language="uk-UA")
-            Clock.schedule_once(lambda dt: toast(f"Отримано команду: {command}", duration=3), 0)
-
-            # Check if any trigger word is present in the command
-            if any(self.names_list in command):
-                Clock.schedule_once(lambda dt: plyer.notification.notify(title="Розпізнано слово",
-                                                                         message=command), 0)
-
-            else:
-                print("Команда не визначена.")
-
-        except sr.UnknownValueError:
-            pass
-        # Clock.schedule_once(lambda dt: toast("Розпізнавання мови не вдалося.", duration=3), 0)
-        except sr.RequestError as e:
-            pass
-        # Clock.schedule_once(lambda dt: toast(f"Не вдалося отримати результати від служби Google Speech Recognition; {e}", duration=3), 0)
-
-        while True:
-            if self.root.ids.detecting_button.icon == "play":
-                break
+                if any(name in command for name in self.names_list):
+                    Clock.schedule_once(lambda dt: plyer.notification.notify(title="Розпізнано слово", message=command), 0)
+            except sr.UnknownValueError:
+                pass
+            except sr.RequestError as e:
+                pass
+            # Код, що виконається після завершення прослуховування, якщо self.is_listening == False
+            print("Listening stopped.")
+                
 
     def general_detection(self):
         detecting_label = self.root.ids.detecting_label
@@ -130,12 +122,12 @@ class Main(MDApp):
 
         if detecting_button.icon == 'play':
             detecting_label.text = "Розпізнавання..."
-            self.listen_for_command = True
+            self.start_listening_thread()
             detecting_label.pos_hint = {"center_x": 0.6, "center_y": 0.6}
             detecting_button.icon = 'square'
         else:
             detecting_label.text = "Почати розпізнавання"
-            self.listen_for_command = False
+            self.stop_listening()
             detecting_label.pos_hint = {"center_x": 0.5, "center_y": 0.6}
             detecting_button.icon = 'play'
 
