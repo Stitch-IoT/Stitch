@@ -175,10 +175,6 @@ class Main(MDApp):
             tranlate_button.pos_hint = {"center_x": 0.9, "center_y": 0.5}
             new_list_item.add_widget(tranlate_button)
 
-            self.names_list.append(translation_text)  # saves text in  translation_text
-            list_container = self.root.ids.list_of_names
-            list_container.add_widget(new_list_item)
-
             file = text_to_speach(translation_text)  # Capture the returned filename
             toast("saying...", duration=4)
             self.play_audio(file)
