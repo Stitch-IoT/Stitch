@@ -98,15 +98,17 @@ class Main(MDApp):
 
     def listen_for_command(self):
         while self.is_listening:
+            print("Listening started")
             with sr.Microphone() as source:
                 self.recognizer.adjust_for_ambient_noise(source)
-                audio = self.recognizer.listen(source, timeout=4)
+                audio = self.recognizer.listen(source)
 
             try:
                 command = self.recognizer.recognize_google(audio, language="uk-UA")
                 Clock.schedule_once(lambda dt: toast(f"Отримано команду: {command}", duration=3), 0)
 
                 if any(name in command for name in self.names_list):
+                    print("if any(name in command for name in self.names_list):")
                     Clock.schedule_once(lambda dt: plyer.notification.notify(title="Розпізнано слово", message=command), 0)
             except sr.UnknownValueError:
                 pass
