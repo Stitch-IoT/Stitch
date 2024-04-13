@@ -17,6 +17,8 @@ import threading
 from kivy.clock import Clock
 from kv_helpers import kv
 from text_to_speach import text_to_speach
+import time
+from speech_recognition import WaitTimeoutError
 
 kivy.core.window.Window.size = (360, 600)
 
@@ -92,7 +94,7 @@ class Main(MDApp):
             self.thread.start()
 
     def stop_listening(self):
-        self.is_listening = False  # Встановлення флагу для вимкнення прослуховування
+        self.is_listening = False 
         if hasattr(self, 'thread') and self.thread is not None and self.thread.is_alive():
             self.thread.join()
 
@@ -101,7 +103,10 @@ class Main(MDApp):
             print("Listening started")
             with sr.Microphone() as source:
                 self.recognizer.adjust_for_ambient_noise(source)
-                audio = self.recognizer.listen(source)
+                try:
+                    audio = self.recognizer.listen(source, timeout=4) 
+                except WaitTimeoutError:
+                    continue
 
             try:
                 command = self.recognizer.recognize_google(audio, language="uk-UA")
@@ -110,11 +115,15 @@ class Main(MDApp):
                 if any(name in command for name in self.names_list):
                     print("if any(name in command for name in self.names_list):")
                     Clock.schedule_once(lambda dt: plyer.notification.notify(title="Розпізнано слово", message=command), 0)
+                else:
+                    continue
+
             except sr.UnknownValueError:
                 pass
             except sr.RequestError as e:
                 pass
-            # Код, що виконається після завершення прослуховування, якщо self.is_listening == False
+
+            time.sleep(0.3)  
             print("Listening stopped.")
                 
 
