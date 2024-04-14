@@ -64,24 +64,54 @@ MDFloatLayout:
 			icon: 'home'
 			id: home_screen
 			name: "home"
-			WordSectionContent:
-			MDBoxLayout:
-				orientation: 'horizontal'
-				size_hint: None, None
-				size: root.size
-				pos_hint: {'center_x': 0.5, 'center_y': 0.5}  # Center the BoxLayout
-		
-				Button:
-					background_color: 0,1,1,1					
-					text: 'Слова'
-					pos_hint: {'center_y': 0.5}
-					
-		
-				Button:
-					background_color: 0.8, 0.8, 1, 1
-					text: 'Звуки'
-					pos_hint: {'center_y': 0.5}
+			MDLabel:
+				text : "SoundTouch"
+				font_size : "24dp"
+				pos_hint: {"center_x": .55, "center_y": .73}
 				
+			MDBoxLayout:
+				orientation: 'vertical'
+				pos_hint: {"center_y": .7}
+				MDRectangleFlatIconButton:
+					padding : 30
+					icon : "file-word-box"				
+					text: 'Слова'
+					text_color: 0,0,0, 1  
+					md_bg_color: 0,0,0,0
+					line_color: 0.75, 0.75, 0.75, 1
+					icon_color: 0,0,0, 1
+					font_size: '16sp'  
+					icon_size: '24dp'
+					size_hint_x: 1
+					on_press: app.word_section()
+	
+
+				MDRectangleFlatIconButton:
+					padding : 30
+					icon : "volume-high"
+					text: 'Звуки'
+					text_color: 0,0,0,1 
+					md_bg_color: 0,0,0,0
+					line_color: 0.75, 0.75, 0.75, 1
+					icon_color: 0,0,0,1 
+					font_size: '16sp'  
+					icon_size: '24dp'  
+					size_hint_x: 1
+				
+				
+				MDRectangleFlatIconButton:
+					padding : 30
+					icon : "cog"
+					text: 'Налаштування'
+					text_color: 0,0,0,1 
+					md_bg_color: 0,0,0,0
+					line_color: 0.75, 0.75, 0.75, 1
+					icon_color: 0,0,0,1 
+					font_size: '16sp' 
+					icon_size: '24dp'  
+					size_hint_x: 1
+				
+			
 				
 
 
@@ -119,7 +149,7 @@ MDFloatLayout:
 		    	MDFloatLayout:
 
 			        MDRectangleFlatIconButton:
-			        	id : audio_to_text_button
+			        	id : au`dio_to_text_button
 			            text: 'Почати'
 			            font_size : "16sp"
 			            icon: 'play'
@@ -207,7 +237,6 @@ class Main(MDApp):
 	AUTO_RELOADER_PATHS = [
 	    (".", {"recursive": True}),
 	]
-	current_icon = "play"
 
 	def __init__(self, **kwargs):
 		super().__init__(**kwargs)
@@ -270,7 +299,6 @@ class Main(MDApp):
 		self.is_listening = True
 		threading.Thread(target=self.listen_for_command).start()
 
-
 	def listen_for_command(self):
 
 		recognizer = sr.Recognizer()
@@ -321,8 +349,6 @@ class Main(MDApp):
 			detecting_label.pos_hint = {"center_x" : 0.5, "center_y" : 0.6}
 			detecting_button.icon = 'play'
 
-
-
 	def start_audio_to_text(self):
 
 
@@ -344,7 +370,6 @@ class Main(MDApp):
 			audio_to_text_button.text_color = 1, 1, 1, 1
 			audio_to_text_button.md_bg_color = 0, 0, 0, 1
 
-
 	def change_detection_label(self, dt):
 		detection_label = self.root.ids.result_from_audio
 		audio_to_text_button = self.root.ids.audio_to_text_button
@@ -356,7 +381,6 @@ class Main(MDApp):
 		audio_to_text_button.icon_color = 1, 1, 1, 1
 		audio_to_text_button.text_color = 1, 1, 1, 1
 		audio_to_text_button.md_bg_color = 0, 0, 0, 1
-
 
 	def start_text_to_audio(self):
 		translation_text = self.root.ids.translation_input.text
@@ -381,7 +405,6 @@ class Main(MDApp):
 				text_to_audio_button.text_color = 1, 1, 1, 1
 				text_to_audio_button.md_bg_color = 0, 0, 0, 1
 
-
 	def clear_text_field(self):
 		translation_input = self.root.ids.translation_input
 		text_to_audio_button = self.root.ids.text_to_audio_button
@@ -398,50 +421,16 @@ class Main(MDApp):
 			text_to_audio_button.text_color = 1, 1, 1, 1
 			text_to_audio_button.md_bg_color = 0, 0, 0, 1
 
-
-
-
-
-class YourContainer(IRightBodyTouch, MDBoxLayout):
-    pass
-
-
-# code for word section on Screen 1
-"""
-MDScrollView:
-				size: self.size
-				MDList:
-					id : list_of_names
-
-			MDIconButton:
-				pos_hint: {"center_x": .5, "center_y": .1}
-				spacing : 50
-				id : plus
-				icon : "plus"
-				icon_size : 45
-				adaptive_size:True
-				on_press:
-					app.add_name()
-"""
-
-#functions for proper work of the buttons on the Screen 1
-"""
-	def add_word_section(self):
-		# Remove the screen with two buttons
+	def word_section(self):
 		self.remove_home_screen_content()
-
-		# Add the word section content to the home screen
 		word_section_content = WordSectionContent()
 		self.root.ids.home_screen.add_widget(word_section_content)
 
 	def remove_home_screen_content(self):
-		# Remove the existing content (buttons) from the home screen
 		home_screen = self.root.ids.home_screen
 		home_screen.clear_widgets()
 
-
 	def remove_word_section(self):
-		# Remove any existing word section content from the home screen
 		home_screen = self.root.ids.home_screen
 		for child in home_screen.children[:]:
 			if isinstance(child, WordSectionContent):
@@ -449,10 +438,13 @@ MDScrollView:
 				break
 
 
-	def word_section(self):
-		# Call method to add the word section content
-		self.add_word_section()
-"""
+
+
+
+class YourContainer(MDBoxLayout):
+    pass
+
+#functions for proper work of the buttons on the Screen 1
 
 
 if __name__ == "__main__":
