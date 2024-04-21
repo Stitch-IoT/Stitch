@@ -23,19 +23,25 @@ kivy.core.window.Window.size = (360, 600)
 kv = """
 <WordSectionContent>:
 	id: word_section_content
-    MDScrollView:
-        size: self.size
-        MDList:
-            id: list_of_names
+	MDBoxLayout:
+        orientation: 'vertical'
+        MDIconButton:
+            icon : "arrow-left"
+            on_press : app.back_to_home_screen()
 
-    MDIconButton:
-        pos_hint: {"center_x": .5, "center_y": .1}
-        spacing: 50
-        id: plus
-        icon: "plus"
-        icon_size: 45
-        adaptive_size: True
-        on_press: app.add_name()
+        MDScrollView:
+            MDList:
+                id: list_of_names
+
+
+        MDIconButton:
+            pos_hint: {"center_x": .5, "center_y": .1}
+            spacing: 50
+            id: plus
+            icon: "plus"
+            icon_size: 45
+            adaptive_size: True
+            on_press: app.add_name()
 
 <SoundSectionContent>:
 	id: sound_section_content
@@ -50,7 +56,7 @@ kv = """
 			text: "Виберіть звук"
 			size_hint_y : .1
 			font_size : "20sp"
-			
+
 		MDGridLayout:
 			pos_hint: {"center_x": .5, "center_y": .5}
 			cols: 2
@@ -67,8 +73,8 @@ kv = """
 				spacing: None
 				size_hint_x: .5
 				size_hint_y: .5
-	
-	
+
+
 			MDRectangleFlatIconButton:
 				icon : "alarm-light"
 				text: 'Сигналізація'
@@ -80,8 +86,8 @@ kv = """
 				icon_size: '24dp'  
 				size_hint_x: .5
 				size_hint_y: .5
-			
-			
+
+
 			MDRectangleFlatIconButton:
 				icon : "car"				
 				text: 'Сигнал авто'
@@ -93,8 +99,8 @@ kv = """
 				icon_size: '24dp'
 				size_hint_x: .5
 				size_hint_y: .5
-				
-				
+
+
 			MDRectangleFlatIconButton:
 				icon : "lock"				
 				text: 'Більше'
@@ -106,9 +112,58 @@ kv = """
 				icon_size: '24dp'
 				size_hint_x: .5
 				size_hint_y: .5
-			
-		
-	
+
+
+
+<ScreenOne>:
+    MDLabel:
+        text : "SoundTouch"
+        font_size : "24dp"
+        pos_hint: {"center_x": .55, "center_y": .73}
+
+    MDBoxLayout:
+        orientation: 'vertical'
+        pos_hint: {"center_y": .7}
+        MDRectangleFlatIconButton:
+            padding : 30
+            icon : "file-word-box"				
+            text: 'Слова'
+            text_color: 0,0,0, 1  
+            md_bg_color: 0,0,0,0
+            line_color: 0.75, 0.75, 0.75, 1
+            icon_color: 0,0,0, 1
+            font_size: '16sp'  
+            icon_size: '24dp'
+            size_hint_x: 1
+            on_press: app.word_section()
+
+
+        MDRectangleFlatIconButton:
+            padding : 30
+            icon : "volume-high"
+            text: 'Звуки'
+            text_color: 0,0,0,1 
+            md_bg_color: 0,0,0,0
+            line_color: 0.75, 0.75, 0.75, 1
+            icon_color: 0,0,0,1 
+            font_size: '16sp'  
+            icon_size: '24dp'  
+            size_hint_x: 1
+            on_press : app.sound_section()
+
+
+        MDRectangleFlatIconButton:
+            padding : 30
+            icon : "cog"
+            text: 'Налаштування'
+            text_color: 0,0,0,1 
+            md_bg_color: 0,0,0,0
+            line_color: 0.75, 0.75, 0.75, 1
+            icon_color: 0,0,0,1 
+            font_size: '16sp' 
+            icon_size: '24dp'  
+            size_hint_x: 1
+
 <Content>
     orientation: "vertical"
     spacing: "12dp"
@@ -133,61 +188,11 @@ MDFloatLayout:
 		spacing : 0
 		id : bottom_nav
     	MDBottomNavigationItem:
-    	
+
 			icon: 'home'
 			id: home_screen
 			name: "home"
-			MDLabel:
-				text : "SoundTouch"
-				font_size : "24dp"
-				pos_hint: {"center_x": .55, "center_y": .73}
-				
-			MDBoxLayout:
-				orientation: 'vertical'
-				pos_hint: {"center_y": .7}
-				MDRectangleFlatIconButton:
-					padding : 30
-					icon : "file-word-box"				
-					text: 'Слова'
-					text_color: 0,0,0, 1  
-					md_bg_color: 0,0,0,0
-					line_color: 0.75, 0.75, 0.75, 1
-					icon_color: 0,0,0, 1
-					font_size: '16sp'  
-					icon_size: '24dp'
-					size_hint_x: 1
-					on_press: app.word_section()
-	
-
-				MDRectangleFlatIconButton:
-					padding : 30
-					icon : "volume-high"
-					text: 'Звуки'
-					text_color: 0,0,0,1 
-					md_bg_color: 0,0,0,0
-					line_color: 0.75, 0.75, 0.75, 1
-					icon_color: 0,0,0,1 
-					font_size: '16sp'  
-					icon_size: '24dp'  
-					size_hint_x: 1
-					on_press : app.sound_section()
-				
-				
-				MDRectangleFlatIconButton:
-					padding : 30
-					icon : "cog"
-					text: 'Налаштування'
-					text_color: 0,0,0,1 
-					md_bg_color: 0,0,0,0
-					line_color: 0.75, 0.75, 0.75, 1
-					icon_color: 0,0,0,1 
-					font_size: '16sp' 
-					icon_size: '24dp'  
-					size_hint_x: 1
-				
-			
-				
-
+			ScreenOne:
 
 		MDBottomNavigationItem:
 		    icon : 'play-circle'
@@ -201,7 +206,7 @@ MDFloatLayout:
 					text : 'Почати розпізнавання'
 					pos_hint : {"center_x":.5, "center_y":.6}
 					font_size : "24dp"
-					
+
 
 				MDIconButton:
 					id: detecting_button
@@ -210,7 +215,7 @@ MDFloatLayout:
 					adaptive_size: True
 					pos_hint : {"center_x":.5, "center_y":.4}
 					on_press: app.general_detection()
-						
+
 
 
 		MDBottomNavigationItem:
@@ -250,7 +255,7 @@ MDFloatLayout:
 		    			pos_hint: {"center_x": .5, "center_y": .3}
 		    			size_hint: 0.9, None
 		    			font_size : "16sp"
-        				
+
 
 		        Widget:
 			        size_hint_y: None
@@ -260,7 +265,7 @@ MDFloatLayout:
 			                rgba: 0, 0, 0, 1 
 			            Line:
 			                points: self.x, self.y, self.width, self.y
-			    
+
 		    	MDFloatLayout:
 
 			    	MDTextField:
@@ -278,7 +283,7 @@ MDFloatLayout:
 			        	text: 'Очистити'
 			            pos_hint: {"center_x": 0.5, "center_y": 0.55}
 			            on_press : app.clear_text_field()
-			            
+
 
 			        MDRectangleFlatIconButton:
 			        	id : text_to_audio_button
@@ -294,11 +299,15 @@ MDFloatLayout:
 			            text_color: 1, 1, 1, 1  
 			            md_bg_color: 0, 0, 0, 1 
 			            line_color: 0, 0, 0, 1
-			            
 
-			
+
+
 
 """
+
+
+class ScreenOne(MDFloatLayout):
+    pass
 
 
 class YourContainer(MDBoxLayout):
@@ -331,6 +340,7 @@ class Main(MDApp):
         self.recognizer = sr.Recognizer()
 
     def build(self):
+        self.title = "SoundTouch"
         return Builder.load_string(kv)
 
     def add_name(self):
@@ -350,7 +360,7 @@ class Main(MDApp):
     def save_name(self, obj):
         new_item_text = self.dialog.content_cls.ids.text_input.text
         if len(new_item_text) < 1:
-            toast("Field is empty", duration=2)
+            toast("Поле порожнє", duration=2)
         else:
             new_list_item = OneLineRightIconListItem(text=new_item_text)
             delete_name_button = MDIconButton(
@@ -362,7 +372,7 @@ class Main(MDApp):
             self.names_list.append(new_item_text)
             list_container = WordSectionContent().ids.list_of_names
             list_container.add_widget(new_list_item)
-            toast("Name saved", duration=2)
+            toast("Фраза збережена", duration=2)
             self.dialog.dismiss()
 
     def delete_name(self, list_item):
@@ -522,13 +532,6 @@ class Main(MDApp):
         word_section_content = WordSectionContent()
         self.root.ids.home_screen.add_widget(word_section_content)
 
-    def remove_word_section(self):
-        home_screen = self.root.ids.home_screen
-        for child in home_screen.children[:]:
-            if isinstance(child, WordSectionContent):
-                home_screen.remove_widget(child)
-                break
-
     def sound_section(self):
         self.remove_home_screen_content()
         sound_section_content = SoundSectionContent()
@@ -539,7 +542,24 @@ class Main(MDApp):
         home_screen.clear_widgets()
 
     def back_to_home_screen(self):
+        self.remove_word_section()
+        self.remove_sound_section()
         home_screen = self.root.ids.home_screen
+        home_screen.add_widget(ScreenOne())
+
+    def remove_word_section(self):
+        home_screen = self.root.ids.home_screen
+        for child in home_screen.children[:]:
+            if isinstance(child, WordSectionContent):
+                home_screen.remove_widget(child)
+                break
+
+    def remove_sound_section(self):
+        home_screen = self.root.ids.home_screen
+        for child in home_screen.children[:]:
+            if isinstance(child, SoundSectionContent):
+                home_screen.remove_widget(child)
+                break
 
 
 if __name__ == "__main__":
