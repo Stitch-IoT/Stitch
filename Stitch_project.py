@@ -86,7 +86,7 @@ class Main(MDApp):
             delete_name_button.pos_hint = {"center_x": 0.9, "center_y": 0.5}
             new_list_item.add_widget(delete_name_button)
             self.names_list.append(new_item_text)
-         list_container = self.root.ids.list_of_names
+            # list_container = self.root.ids.list_of_names
             list_container = WordSectionContent().ids.list_of_names
             list_container.add_widget(new_list_item)
             toast("Фраза збережена", duration=2)

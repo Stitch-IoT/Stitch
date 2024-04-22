@@ -1,5 +1,95 @@
-
 kv = """
+<WordSectionContent>:
+	id: word_section_content
+	MDBoxLayout:
+        orientation: 'vertical'
+        MDIconButton:
+            icon : "arrow-left"
+            on_press : app.back_to_home_screen()
+
+        MDScrollView:
+            MDList:
+                id: list_of_names
+
+
+        MDIconButton:
+            pos_hint: {"center_x": .5, "center_y": .1}
+            spacing: 50
+            id: plus
+            icon: "plus"
+            icon_size: 45
+            adaptive_size: True
+            on_press: app.add_name()
+
+<SoundSectionContent>:
+	id: sound_section_content
+	MDBoxLayout:
+		orientation: 'vertical'
+		MDIconButton:
+			icon : "arrow-left"
+			size_hint_y : .1
+			on_press : app.back_to_home_screen()
+		MDLabel:
+			halign: "center"
+			text: "Виберіть звук"
+			size_hint_y : .1
+			font_size : "20sp"
+
+		MDGridLayout:
+			pos_hint: {"center_x": .5, "center_y": .5}
+			cols: 2
+			spacing: '3dp'
+			MDRectangleFlatIconButton:
+				icon : "bell"				
+				text: 'Дзвінок'
+				text_color: 0,0,0, 1  
+				md_bg_color: 0,0,0,0
+				line_color: 0.85, 0.85, 0.85, 1
+				icon_color: 0,0,0, 1
+				font_size: '16sp'  
+				icon_size: '24dp'
+				spacing: None
+				size_hint_x: .5
+				size_hint_y: .5
+
+
+			MDRectangleFlatIconButton:
+				icon : "alarm-light"
+				text: 'Сигналізація'
+				text_color: 0,0,0,1 
+				md_bg_color: 0,0,0,0
+				line_color: 0.85, 0.85, 0.85, 1
+				icon_color: 0,0,0,1 
+				font_size: '16sp'  
+				icon_size: '24dp'  
+				size_hint_x: .5
+				size_hint_y: .5
+
+
+			MDRectangleFlatIconButton:
+				icon : "car"				
+				text: 'Сигнал авто'
+				text_color: 0,0,0, 1  
+				md_bg_color: 0,0,0,0
+				line_color: 0.85, 0.85, 0.85, 1
+				icon_color: 0,0,0, 1
+				font_size: '16sp'  
+				icon_size: '24dp'
+				size_hint_x: .5
+				size_hint_y: .5
+
+
+			MDRectangleFlatIconButton:
+				icon : "lock"				
+				text: 'Більше'
+				text_color: 0,0,0, 1  
+				md_bg_color: 0,0,0,0
+				line_color: 0.85, 0.85, 0.85, 1
+				icon_color: 0,0,0, 1
+				font_size: '16sp'  
+				icon_size: '24dp'
+				size_hint_x: .5
+				size_hint_y: .5
 
 
 
@@ -82,7 +172,6 @@ MDFloatLayout:
 			name: "home"
 			ScreenOne:
 
-
 		MDBottomNavigationItem:
 		    icon : 'play-circle'
 			id : screen2
@@ -117,7 +206,6 @@ MDFloatLayout:
 		    	MDFloatLayout:
 
 			        MDRectangleFlatIconButton:
-
 			        	id : audio_to_text_button
 			            text: 'Почати'
 			            font_size : "16sp"
