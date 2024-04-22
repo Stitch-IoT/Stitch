@@ -94,7 +94,7 @@ class Main(MDApp):
             self.thread.start()
 
     def stop_listening(self):
-        self.is_listening = False 
+        self.is_listening = False
         if hasattr(self, 'thread') and self.thread is not None and self.thread.is_alive():
             self.thread.join()
 
@@ -104,7 +104,7 @@ class Main(MDApp):
             with sr.Microphone() as source:
                 self.recognizer.adjust_for_ambient_noise(source)
                 try:
-                    audio = self.recognizer.listen(source, timeout=4) 
+                    audio = self.recognizer.listen(source, timeout=4)
                 except WaitTimeoutError:
                     continue
 
@@ -114,7 +114,8 @@ class Main(MDApp):
 
                 if any(name in command for name in self.names_list):
                     print("if any(name in command for name in self.names_list):")
-                    Clock.schedule_once(lambda dt: plyer.notification.notify(title="Розпізнано слово", message=command), 0)
+                    Clock.schedule_once(lambda dt: plyer.notification.notify(title="Розпізнано слово", message=command),
+                                        0)
                 else:
                     continue
 
@@ -123,9 +124,8 @@ class Main(MDApp):
             except sr.RequestError as e:
                 pass
 
-            time.sleep(0.3)  
+            time.sleep(0.3)
             print("Listening stopped.")
-                
 
     def general_detection(self):
         detecting_label = self.root.ids.detecting_label
@@ -143,7 +143,6 @@ class Main(MDApp):
             detecting_button.icon = 'play'
 
     def start_audio_to_text(self):
-
         detection_label = self.root.ids.result_from_audio
         audio_to_text_button = self.root.ids.audio_to_text_button
 
@@ -153,14 +152,37 @@ class Main(MDApp):
             audio_to_text_button.text = 'Слухаю...'
             audio_to_text_button.text_color = 0, 0, 0, 1
             audio_to_text_button.md_bg_color = 1, 1, 1, 1
+            recognizer = sr.Recognizer()
 
+            with sr.Microphone() as source:
+                recognizer.adjust_for_ambient_noise(source)
+                audio = recognizer.listen(source)
+
+            try:
+                text = recognizer.recognize_google(audio, language="uk-UA", show_all=False)
+                print("You said:", text)
+                # Limiting to 120 characters
+                if len(text) > 260:
+                    text = text[:260] + "..."
+                detection_label.text = text if text else "ніхуя не ясно"
+            except sr.UnknownValueError:
+                detection_label.text = "ніхуя не ясно"
+            except sr.RequestError as e:
+                print("Could not request results; {0}".format(e))
+                detection_label.text = "Could not request results"
+            finally:
+                audio_to_text_button.icon = 'play'
+                audio_to_text_button.text = 'Почати'
+                audio_to_text_button.icon_color = 1, 1, 1, 1
+                audio_to_text_button.text_color = 1, 1, 1, 1
+                audio_to_text_button.md_bg_color = 0, 0, 0, 1
 
         else:
-            audio_to_text_button.icon = 'play'
-            audio_to_text_button.text = 'Почати'
-            audio_to_text_button.icon_color = 1, 1, 1, 1
-            audio_to_text_button.text_color = 1, 1, 1, 1
-            audio_to_text_button.md_bg_color = 0, 0, 0, 1
+            audio_to_text_button.icon = 'square'
+            audio_to_text_button.icon_color = 0, 0, 0, 1
+            audio_to_text_button.text = 'Слухаю...'
+            audio_to_text_button.text_color = 0, 0, 0, 1
+            audio_to_text_button.md_bg_color = 1, 1, 1, 1
 
     def change_detection_label(self, dt):
         detection_label = self.root.ids.result_from_audio
@@ -230,6 +252,8 @@ class Main(MDApp):
         sound = SoundLoader.load(filename)
         if sound:
             sound.play()
+
+
 class YourContainer(IRightBodyTouch, MDBoxLayout):
     pass
 
