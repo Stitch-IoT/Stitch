@@ -8,7 +8,6 @@ from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDFlatButton, MDIconButton
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.floatlayout import MDFloatLayout
-from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.list import IRightBodyTouch
 from kivymd.uix.list import MDList, OneLineListItem, OneLineRightIconListItem
 from kivymd.uix.bottomnavigation import MDBottomNavigationItem
@@ -22,24 +21,21 @@ from text_to_speach import text_to_speach
 import time
 from speech_recognition import WaitTimeoutError
 from watchdog.observers import Observer
+
 kivy.core.window.Window.size = (360, 600)
 
 
 class ScreenOne(MDFloatLayout):
     pass
 
-
 class YourContainer(MDBoxLayout):
     pass
-
 
 class Content(MDFloatLayout):
     pass
 
-
 class WordSectionContent(MDBoxLayout):
     pass
-
 
 class SoundSectionContent(MDBoxLayout):
     pass
@@ -82,6 +78,7 @@ class Main(MDApp):
             toast("Поле порожнє", duration=2)
         else:
             new_list_item = OneLineRightIconListItem(text=new_item_text)
+
             delete_name_button = MDIconButton(
                 icon="delete",
                 on_release=lambda x, item=new_list_item: self.delete_name(item),
@@ -89,9 +86,11 @@ class Main(MDApp):
             delete_name_button.pos_hint = {"center_x": 0.9, "center_y": 0.5}
             new_list_item.add_widget(delete_name_button)
             self.names_list.append(new_item_text)
+         list_container = self.root.ids.list_of_names
             list_container = WordSectionContent().ids.list_of_names
             list_container.add_widget(new_list_item)
             toast("Фраза збережена", duration=2)
+
             self.dialog.dismiss()
 
     def delete_name(self, list_item):
@@ -241,6 +240,7 @@ class Main(MDApp):
                 text_to_audio_button.icon = "square"
                 text_to_audio_button.icon_color = 0, 0, 0, 1
                 text_to_audio_button.text = "Відтворюється..."
+
                 text_to_audio_button.text_color = 0, 0, 0, 1
                 text_to_audio_button.md_bg_color = 1, 1, 1, 1
 
@@ -272,10 +272,14 @@ class Main(MDApp):
         word_section_content = WordSectionContent()
         self.root.ids.home_screen.add_widget(word_section_content)
 
+    def added_name(self, item):
+        pass
+
     def play_audio(self, filename):
         sound = SoundLoader.load(filename)
         if sound:
             sound.play()
+
     def sound_section(self):
         self.remove_home_screen_content()
         sound_section_content = SoundSectionContent()
@@ -304,6 +308,14 @@ class Main(MDApp):
             if isinstance(child, SoundSectionContent):
                 home_screen.remove_widget(child)
                 break
+                
+class YourContainer(IRightBodyTouch, MDBoxLayout):
+    pass
+
+
+# adaptive_width = True
+# edit_button = MDIconButton(icon='pencil', on_release=close_dialog)
+# delete_button = MDIconButton(icon='delete', on_release = app.delete_name)
 
 
 if __name__ == "__main__":
