@@ -1,4 +1,5 @@
 import kivy.core.window
+from kaki.app import App
 import time
 from kivy.lang import Builder
 from kivymd.app import MDApp
@@ -19,17 +20,33 @@ from kv_helpers import kv
 from text_to_speach import text_to_speach
 import time
 from speech_recognition import WaitTimeoutError
+from watchdog.observers import Observer
 
 kivy.core.window.Window.size = (360, 600)
 
 
+class ScreenOne(MDFloatLayout):
+    pass
+
+class YourContainer(MDBoxLayout):
+    pass
+
 class Content(MDFloatLayout):
+    pass
+
+class WordSectionContent(MDBoxLayout):
+    pass
+
+class SoundSectionContent(MDBoxLayout):
     pass
 
 
 class Main(MDApp):
-    dialog = None
-    current_icon = "play"
+    DEBUG = False
+    RAISE_ERROR = True
+    AUTO_RELOADER_PATHS = [
+        (".", {"recursive": True}),
+    ]
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -38,35 +55,42 @@ class Main(MDApp):
         self.recognizer = sr.Recognizer()
 
     def build(self):
+        self.title = "SoundTouch"
         return Builder.load_string(kv)
 
     def add_name(self):
-        close_button = MDFlatButton(text='Закрити', on_release=self.close_dialog)
-        save_button = MDFlatButton(text='Зберегети', on_release=self.save_name)
-        self.dialog = MDDialog(title="Запишіть ім'я чи фразу", type="custom", content_cls=Content(),
-                               buttons=[close_button, save_button])
+        close_button = MDFlatButton(text="Закрити", on_release=self.close_dialog)
+        save_button = MDFlatButton(text="Зберегети", on_release=self.save_name)
+        self.dialog = MDDialog(
+            title="Запишіть ім'я чи фразу",
+            type="custom",
+            content_cls=Content(),
+            buttons=[close_button, save_button],
+        )
         self.dialog.open()
 
     def close_dialog(self, obj):
         self.dialog.dismiss()
 
     def save_name(self, obj):
-
         new_item_text = self.dialog.content_cls.ids.text_input.text
         if len(new_item_text) < 1:
             toast("Поле порожнє", duration=2)
         else:
             new_list_item = OneLineRightIconListItem(text=new_item_text)
-            delete_name_button = MDIconButton(icon="delete",
-                                              on_release=lambda x, item=new_list_item: self.delete_name(item))
+
+            delete_name_button = MDIconButton(
+                icon="delete",
+                on_release=lambda x, item=new_list_item: self.delete_name(item),
+            )
             delete_name_button.pos_hint = {"center_x": 0.9, "center_y": 0.5}
             new_list_item.add_widget(delete_name_button)
-
             self.names_list.append(new_item_text)
-            list_container = self.root.ids.list_of_names
+            # list_container = self.root.ids.list_of_names
+            list_container = WordSectionContent().ids.list_of_names
             list_container.add_widget(new_list_item)
+            toast("Фраза збережена", duration=2)
 
-            toast("Name saved", duration=2)
             self.dialog.dismiss()
 
     def delete_name(self, list_item):
@@ -212,19 +236,17 @@ class Main(MDApp):
             toast("saying...", duration=4)
             self.play_audio(file)
 
-            # self.dialog = MDDialog(title="Your Title", text="Your Text")  # Create dialog
-            # self.dialog.open()  # Open the dialog
-
-            if text_to_audio_button.icon == 'play':
-                text_to_audio_button.icon = 'square'
+            if text_to_audio_button.icon == "play":
+                text_to_audio_button.icon = "square"
                 text_to_audio_button.icon_color = 0, 0, 0, 1
-                text_to_audio_button.text = 'Відтворюється...'
+                text_to_audio_button.text = "Відтворюється..."
+
                 text_to_audio_button.text_color = 0, 0, 0, 1
                 text_to_audio_button.md_bg_color = 1, 1, 1, 1
 
             else:
-                text_to_audio_button.icon = 'play'
-                text_to_audio_button.text = 'Відтворити'
+                text_to_audio_button.icon = "play"
+                text_to_audio_button.text = "Відтворити"
                 text_to_audio_button.icon_color = 1, 1, 1, 1
                 text_to_audio_button.text_color = 1, 1, 1, 1
                 text_to_audio_button.md_bg_color = 0, 0, 0, 1
@@ -245,6 +267,11 @@ class Main(MDApp):
             text_to_audio_button.text_color = 1, 1, 1, 1
             text_to_audio_button.md_bg_color = 0, 0, 0, 1
 
+    def word_section(self):
+        self.remove_home_screen_content()
+        word_section_content = WordSectionContent()
+        self.root.ids.home_screen.add_widget(word_section_content)
+
     def added_name(self, item):
         pass
 
@@ -253,7 +280,35 @@ class Main(MDApp):
         if sound:
             sound.play()
 
+    def sound_section(self):
+        self.remove_home_screen_content()
+        sound_section_content = SoundSectionContent()
+        self.root.ids.home_screen.add_widget(sound_section_content)
 
+    def remove_home_screen_content(self):
+        home_screen = self.root.ids.home_screen
+        home_screen.clear_widgets()
+
+    def back_to_home_screen(self):
+        self.remove_word_section()
+        self.remove_sound_section()
+        home_screen = self.root.ids.home_screen
+        home_screen.add_widget(ScreenOne())
+
+    def remove_word_section(self):
+        home_screen = self.root.ids.home_screen
+        for child in home_screen.children[:]:
+            if isinstance(child, WordSectionContent):
+                home_screen.remove_widget(child)
+                break
+
+    def remove_sound_section(self):
+        home_screen = self.root.ids.home_screen
+        for child in home_screen.children[:]:
+            if isinstance(child, SoundSectionContent):
+                home_screen.remove_widget(child)
+                break
+                
 class YourContainer(IRightBodyTouch, MDBoxLayout):
     pass
 
