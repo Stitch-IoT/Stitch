@@ -22,20 +22,21 @@ import time
 from speech_recognition import WaitTimeoutError
 from watchdog.observers import Observer
 
+
 kivy.core.window.Window.size = (360, 600)
 
 
 class ScreenOne(MDFloatLayout):
     pass
 
-class YourContainer(MDBoxLayout):
-    pass
 
 class Content(MDFloatLayout):
     pass
 
+
 class WordSectionContent(MDBoxLayout):
     pass
+
 
 class SoundSectionContent(MDBoxLayout):
     pass
@@ -86,23 +87,27 @@ class Main(MDApp):
             delete_name_button.pos_hint = {"center_x": 0.9, "center_y": 0.5}
             new_list_item.add_widget(delete_name_button)
             self.names_list.append(new_item_text)
-            # list_container = self.root.ids.list_of_names
-            list_container = WordSectionContent().ids.list_of_names
+            list_container = self.word_section_content.ids.list_of_names
             list_container.add_widget(new_list_item)
             toast("Фраза збережена", duration=2)
 
             self.dialog.dismiss()
 
     def delete_name(self, list_item):
-        cancel_deleting_button = MDFlatButton(text='Скасувати', on_release=self.cancel_deleting)
-        admit_deleting_button = MDFlatButton(text='Підтвердити',
-                                             on_release=lambda x, item=list_item: self.admit_deleting(item))
-        self.dialog = MDDialog(title='Видалити?',
-                               buttons=[cancel_deleting_button, admit_deleting_button])
+        cancel_deleting_button = MDFlatButton(
+            text="Скасувати", on_release=self.cancel_deleting
+        )
+        admit_deleting_button = MDFlatButton(
+            text="Підтвердити",
+            on_release=lambda x, item=list_item: self.admit_deleting(item),
+        )
+        self.dialog = MDDialog(
+            title="Видалити?", buttons=[cancel_deleting_button, admit_deleting_button]
+        )
         self.dialog.open()
 
     def admit_deleting(self, list_item):
-        list_container = self.root.ids.list_of_names
+        list_container = self.word_section_content.ids.list_of_names
         list_container.remove_widget(list_item)
         self.dialog.dismiss()
         self.names_list.remove(list_item.text)
@@ -119,7 +124,11 @@ class Main(MDApp):
 
     def stop_listening(self):
         self.is_listening = False
-        if hasattr(self, 'thread') and self.thread is not None and self.thread.is_alive():
+        if (
+            hasattr(self, "thread")
+            and self.thread is not None
+            and self.thread.is_alive()
+        ):
             self.thread.join()
 
     def listen_for_command(self):
@@ -134,12 +143,18 @@ class Main(MDApp):
 
             try:
                 command = self.recognizer.recognize_google(audio, language="uk-UA")
-                Clock.schedule_once(lambda dt: toast(f"Отримано команду: {command}", duration=3), 0)
+                Clock.schedule_once(
+                    lambda dt: toast(f"Отримано команду: {command}", duration=3), 0
+                )
 
                 if any(name in command for name in self.names_list):
                     print("if any(name in command for name in self.names_list):")
-                    Clock.schedule_once(lambda dt: plyer.notification.notify(title="Розпізнано слово", message=command),
-                                        0)
+                    Clock.schedule_once(
+                        lambda dt: plyer.notification.notify(
+                            title="Розпізнано слово", message=command
+                        ),
+                        0,
+                    )
                 else:
                     continue
 
@@ -155,25 +170,25 @@ class Main(MDApp):
         detecting_label = self.root.ids.detecting_label
         detecting_button = self.root.ids.detecting_button
 
-        if detecting_button.icon == 'play':
+        if detecting_button.icon == "play":
             detecting_label.text = "Розпізнавання..."
             self.start_listening_thread()
             detecting_label.pos_hint = {"center_x": 0.6, "center_y": 0.6}
-            detecting_button.icon = 'square'
+            detecting_button.icon = "square"
         else:
             detecting_label.text = "Почати розпізнавання"
             self.stop_listening()
             detecting_label.pos_hint = {"center_x": 0.5, "center_y": 0.6}
-            detecting_button.icon = 'play'
+            detecting_button.icon = "play"
 
     def start_audio_to_text(self):
         detection_label = self.root.ids.result_from_audio
         audio_to_text_button = self.root.ids.audio_to_text_button
 
-        if audio_to_text_button.icon == 'play':
-            audio_to_text_button.icon = 'square'
+        if audio_to_text_button.icon == "play":
+            audio_to_text_button.icon = "square"
             audio_to_text_button.icon_color = 0, 0, 0, 1
-            audio_to_text_button.text = 'Слухаю...'
+            audio_to_text_button.text = "Слухаю..."
             audio_to_text_button.text_color = 0, 0, 0, 1
             audio_to_text_button.md_bg_color = 1, 1, 1, 1
             recognizer = sr.Recognizer()
@@ -183,7 +198,9 @@ class Main(MDApp):
                 audio = recognizer.listen(source)
 
             try:
-                text = recognizer.recognize_google(audio, language="uk-UA", show_all=False)
+                text = recognizer.recognize_google(
+                    audio, language="uk-UA", show_all=False
+                )
                 print("You said:", text)
                 # Limiting to 120 characters
                 if len(text) > 260:
@@ -195,16 +212,16 @@ class Main(MDApp):
                 print("Could not request results; {0}".format(e))
                 detection_label.text = "Could not request results"
             finally:
-                audio_to_text_button.icon = 'play'
-                audio_to_text_button.text = 'Почати'
+                audio_to_text_button.icon = "play"
+                audio_to_text_button.text = "Почати"
                 audio_to_text_button.icon_color = 1, 1, 1, 1
                 audio_to_text_button.text_color = 1, 1, 1, 1
                 audio_to_text_button.md_bg_color = 0, 0, 0, 1
 
         else:
-            audio_to_text_button.icon = 'square'
+            audio_to_text_button.icon = "square"
             audio_to_text_button.icon_color = 0, 0, 0, 1
-            audio_to_text_button.text = 'Слухаю...'
+            audio_to_text_button.text = "Слухаю..."
             audio_to_text_button.text_color = 0, 0, 0, 1
             audio_to_text_button.md_bg_color = 1, 1, 1, 1
 
@@ -214,8 +231,8 @@ class Main(MDApp):
 
         detection_label = self.root.ids.result_from_audio
         detection_label.text = "Це приклад роботи нашої програми"
-        audio_to_text_button.icon = 'play'
-        audio_to_text_button.text = 'Почати'
+        audio_to_text_button.icon = "play"
+        audio_to_text_button.text = "Почати"
         audio_to_text_button.icon_color = 1, 1, 1, 1
         audio_to_text_button.text_color = 1, 1, 1, 1
         audio_to_text_button.md_bg_color = 0, 0, 0, 1
@@ -228,7 +245,9 @@ class Main(MDApp):
             toast("Поле порожнє", duration=2)
         else:
             new_list_item = OneLineRightIconListItem(text=translation_text)
-            tranlate_button = MDIconButton(on_release=lambda x, item=new_list_item: self.added_name(item))
+            tranlate_button = MDIconButton(
+                on_release=lambda x, item=new_list_item: self.added_name(item)
+            )
             tranlate_button.pos_hint = {"center_x": 0.9, "center_y": 0.5}
             new_list_item.add_widget(tranlate_button)
 
@@ -261,16 +280,16 @@ class Main(MDApp):
         else:
             translation_input.text = ""
 
-            text_to_audio_button.icon = 'play'
-            text_to_audio_button.text = 'Відтворити'
+            text_to_audio_button.icon = "play"
+            text_to_audio_button.text = "Відтворити"
             text_to_audio_button.icon_color = 1, 1, 1, 1
             text_to_audio_button.text_color = 1, 1, 1, 1
             text_to_audio_button.md_bg_color = 0, 0, 0, 1
 
     def word_section(self):
         self.remove_home_screen_content()
-        word_section_content = WordSectionContent()
-        self.root.ids.home_screen.add_widget(word_section_content)
+        self.word_section_content = WordSectionContent()
+        self.root.ids.home_screen.add_widget(self.word_section_content)
 
     def added_name(self, item):
         pass
@@ -308,14 +327,6 @@ class Main(MDApp):
             if isinstance(child, SoundSectionContent):
                 home_screen.remove_widget(child)
                 break
-                
-class YourContainer(IRightBodyTouch, MDBoxLayout):
-    pass
-
-
-# adaptive_width = True
-# edit_button = MDIconButton(icon='pencil', on_release=close_dialog)
-# delete_button = MDIconButton(icon='delete', on_release = app.delete_name)
 
 
 if __name__ == "__main__":
