@@ -92,16 +92,35 @@ kv = """
 				size_hint_y: .5
 
 
+<SettingsSectionContent>:
+    id: settings_section_content
+    
+	MDBoxLayout:
+		orientation: 'vertical'
+		
+		MDIconButton:
+			icon : "arrow-left"
+			size_hint_y : .1
+			on_press : app.back_to_home_screen()
+			
+        MDLabel:
+            halign: "center"
+            text: "lol kek"
+        
 
 <ScreenOne>:
+    orientation: 'vertical'
     MDLabel:
         text : "SoundTouch"
-        font_size : "24dp"
-        pos_hint: {"center_x": .55, "center_y": .73}
+        font_size : "26dp"
+        valign : "bottom"
+        size_hint_y : .4
+        halign : "center"
 
-    MDBoxLayout:
-        orientation: 'vertical'
-        pos_hint: {"center_y": .7}
+    MDGridLayout:
+        size_hint_y : .5
+        cols: 1
+        
         MDRectangleFlatIconButton:
             padding : 30
             icon : "file-word-box"				
@@ -110,7 +129,7 @@ kv = """
             md_bg_color: 0,0,0,0
             line_color: 0.75, 0.75, 0.75, 1
             icon_color: 0,0,0, 1
-            font_size: '16sp'  
+            font_size: '18sp'  
             icon_size: '24dp'
             size_hint_x: 1
             on_press: app.word_section()
@@ -124,7 +143,7 @@ kv = """
             md_bg_color: 0,0,0,0
             line_color: 0.75, 0.75, 0.75, 1
             icon_color: 0,0,0,1 
-            font_size: '16sp'  
+            font_size: '18sp'  
             icon_size: '24dp'  
             size_hint_x: 1
             on_press : app.sound_section()
@@ -138,9 +157,10 @@ kv = """
             md_bg_color: 0,0,0,0
             line_color: 0.75, 0.75, 0.75, 1
             icon_color: 0,0,0,1 
-            font_size: '16sp' 
+            font_size: '18sp' 
             icon_size: '24dp'  
             size_hint_x: 1
+            on_press : app.settings_section()
 
 <Content>
     orientation: "vertical"

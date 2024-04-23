@@ -8,6 +8,7 @@ from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDFlatButton, MDIconButton
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.floatlayout import MDFloatLayout
+from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.list import IRightBodyTouch
 from kivymd.uix.list import MDList, OneLineListItem, OneLineRightIconListItem
 from kivymd.uix.bottomnavigation import MDBottomNavigationItem
@@ -26,7 +27,7 @@ from watchdog.observers import Observer
 kivy.core.window.Window.size = (360, 600)
 
 
-class ScreenOne(MDFloatLayout):
+class ScreenOne(MDBoxLayout):
     pass
 
 
@@ -39,6 +40,10 @@ class WordSectionContent(MDBoxLayout):
 
 
 class SoundSectionContent(MDBoxLayout):
+    pass
+
+
+class SettingsSectionContent(MDBoxLayout):
     pass
 
 
@@ -286,11 +291,6 @@ class Main(MDApp):
             text_to_audio_button.text_color = 1, 1, 1, 1
             text_to_audio_button.md_bg_color = 0, 0, 0, 1
 
-    def word_section(self):
-        self.remove_home_screen_content()
-        self.word_section_content = WordSectionContent()
-        self.root.ids.home_screen.add_widget(self.word_section_content)
-
     def added_name(self, item):
         pass
 
@@ -299,10 +299,21 @@ class Main(MDApp):
         if sound:
             sound.play()
 
+    def word_section(self):
+        self.remove_home_screen_content()
+        self.word_section_content = WordSectionContent()
+        self.root.ids.home_screen.add_widget(self.word_section_content)
+
+
     def sound_section(self):
         self.remove_home_screen_content()
         sound_section_content = SoundSectionContent()
         self.root.ids.home_screen.add_widget(sound_section_content)
+
+    def settings_section(self):
+        self.remove_home_screen_content()
+        settings_section_content = SettingsSectionContent()
+        self.root.ids.home_screen.add_widget(settings_section_content)
 
     def remove_home_screen_content(self):
         home_screen = self.root.ids.home_screen
@@ -311,6 +322,7 @@ class Main(MDApp):
     def back_to_home_screen(self):
         self.remove_word_section()
         self.remove_sound_section()
+        self.remove_settings_section()
         home_screen = self.root.ids.home_screen
         home_screen.add_widget(ScreenOne())
 
@@ -325,6 +337,13 @@ class Main(MDApp):
         home_screen = self.root.ids.home_screen
         for child in home_screen.children[:]:
             if isinstance(child, SoundSectionContent):
+                home_screen.remove_widget(child)
+                break
+
+    def remove_settings_section(self):
+        home_screen = self.root.ids.home_screen
+        for child in home_screen.children[:]:
+            if isinstance(child, SettingsSectionContent):
                 home_screen.remove_widget(child)
                 break
 
