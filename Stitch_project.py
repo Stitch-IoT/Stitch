@@ -121,8 +121,6 @@ class Main(MDApp):
     def cancel_deleting(self, obj):
         self.dialog.dismiss()
 
-    import threading
-
     def start_listening_thread(self):
         self.is_listening = True
         if self.is_listening:
