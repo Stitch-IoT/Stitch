@@ -121,39 +121,31 @@ class Main(MDApp):
     def cancel_deleting(self, obj):
         self.dialog.dismiss()
 
+    import threading
+
     def start_listening_thread(self):
         self.is_listening = True
         if self.is_listening:
             self.thread = threading.Thread(target=self.listen_for_command)
             self.thread.start()
+            print("Start")
 
     def stop_listening(self):
         self.is_listening = False
-        if (
-            hasattr(self, "thread")
-            and self.thread is not None
-            and self.thread.is_alive()
-        ):
-            self.thread.join()
+        print("Stop")
 
     def listen_for_command(self):
-        while self.is_listening:
-            print("Listening started")
-            with sr.Microphone() as source:
-                self.recognizer.adjust_for_ambient_noise(source)
-                try:
-                    audio = self.recognizer.listen(source, timeout=4)
-                except WaitTimeoutError:
-                    continue
-
+        def callback(recognizer, audio):
             try:
-                command = self.recognizer.recognize_google(audio, language="uk-UA")
+                if not self.is_listening:
+                    return  # Exit the callback if not listening anymore
+                    
+                command = recognizer.recognize_google(audio, language="uk-UA")
                 Clock.schedule_once(
                     lambda dt: toast(f"Отримано команду: {command}", duration=3), 0
                 )
 
                 if any(name in command for name in self.names_list):
-                    print("if any(name in command for name in self.names_list):")
                     Clock.schedule_once(
                         lambda dt: plyer.notification.notify(
                             title="Розпізнано слово", message=command
@@ -161,15 +153,20 @@ class Main(MDApp):
                         0,
                     )
                 else:
-                    continue
+                    return
 
             except sr.UnknownValueError:
                 pass
             except sr.RequestError as e:
                 pass
 
-            time.sleep(0.3)
-            print("Listening stopped.")
+        # Create and enter the audio source into a context manager only once
+        source = sr.Microphone()
+        with source as mic:
+            self.recognizer.adjust_for_ambient_noise(mic)
+
+        # Start listening in the background with the adjusted audio source
+        recognizer_thread = self.recognizer.listen_in_background(source, callback)
 
     def general_detection(self):
         detecting_label = self.root.ids.detecting_label
