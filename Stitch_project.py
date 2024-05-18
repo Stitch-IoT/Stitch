@@ -311,7 +311,11 @@ class Main(MDApp):
             toast("Поле порожнє", duration=2)
 
         else:
+            text_to_audio_button.disabled = True  # Блокуємо кнопку перед очищенням поля
+
             translation_input.text = ""
+            self.reset_button()  # Відновлюємо стан кнопки після очищення поля
+            text_to_audio_button.disabled = False  # Розблоковуємо кнопку після завершення очищення
 
             text_to_audio_button.icon = "play"
             text_to_audio_button.text = "Відтворити"
