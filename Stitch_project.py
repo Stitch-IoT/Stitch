@@ -189,10 +189,6 @@ class Main(MDApp):
             detecting_label.pos_hint = {"center_x": 0.5, "center_y": 0.6}
             detecting_button.icon = "play"
 
-    from kivy.clock import Clock
-    from kivy.uix.label import Label
-    from kivy.uix.button import Button
-
     def start_audio_to_text(self):
         detection_label = self.root.ids.result_from_audio
         audio_to_text_button = self.root.ids.audio_to_text_button
@@ -279,18 +275,33 @@ class Main(MDApp):
 
             if text_to_audio_button.icon == "play":
                 text_to_audio_button.icon = "square"
-                text_to_audio_button.icon_color = 0, 0, 0, 1
+                text_to_audio_button.icon_color = (0, 0, 0, 1)
                 text_to_audio_button.text = "Відтворюється..."
-
-                text_to_audio_button.text_color = 0, 0, 0, 1
-                text_to_audio_button.md_bg_color = 1, 1, 1, 1
+                text_to_audio_button.text_color = (0, 0, 0, 1)
+                text_to_audio_button.md_bg_color = (1, 1, 1, 1)
+                text_to_audio_button.disabled = True  # Блокуємо кнопку
 
             else:
-                text_to_audio_button.icon = "play"
-                text_to_audio_button.text = "Відтворити"
-                text_to_audio_button.icon_color = 1, 1, 1, 1
-                text_to_audio_button.text_color = 1, 1, 1, 1
-                text_to_audio_button.md_bg_color = 0, 0, 0, 1
+                self.reset_button()
+
+    def reset_button(self):
+        text_to_audio_button = self.root.ids.text_to_audio_button
+        text_to_audio_button.icon = "play"
+        text_to_audio_button.text = "Відтворити"
+        text_to_audio_button.icon_color = (1, 1, 1, 1)
+        text_to_audio_button.text_color = (1, 1, 1, 1)
+        text_to_audio_button.md_bg_color = (0, 0, 0, 1)
+        text_to_audio_button.disabled = False  # Розблоковуємо кнопку
+
+    def play_audio(self, filename):
+        sound = SoundLoader.load(filename)
+        if sound:
+            sound.bind(on_stop=self.on_audio_complete)
+            sound.play()
+
+    def on_audio_complete(self, sound):
+        self.reset_button()
+        # toast("тут можна якись текст бахнути", duration=2)
 
     def clear_text_field(self):
         translation_input = self.root.ids.translation_input
@@ -310,11 +321,6 @@ class Main(MDApp):
 
     def added_name(self, item):
         pass
-
-    def play_audio(self, filename):
-        sound = SoundLoader.load(filename)
-        if sound:
-            sound.play()
 
     def word_section(self):
         self.remove_home_screen_content()
