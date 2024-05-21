@@ -52,10 +52,6 @@ class SettingsSectionContent(MDBoxLayout):
     pass
 
 
-class LoadingScreen(MDBoxLayout):
-    pass
-
-
 def update_ui(detection_label, audio_to_text_button, result_text):
     detection_label.text = result_text
 
@@ -68,6 +64,30 @@ def update_ui(detection_label, audio_to_text_button, result_text):
     # audio_to_text_button.disabled = False
 
 
+def recognize_speech(detection_label, audio_to_text_button):
+    recognizer = sr.Recognizer()
+
+    with sr.Microphone() as source:
+        recognizer.adjust_for_ambient_noise(source)
+        audio = recognizer.listen(source)
+
+    try:
+        text = recognizer.recognize_google(audio, language="uk-UA", show_all=False)
+        print("You said:", text)
+        # Limiting to 260 characters
+        if len(text) > 260:
+            text = text[:260] + "..."
+        result_text = text if text else "ніхуя не ясно"
+    except sr.UnknownValueError:
+        result_text = "ніхуя не ясно"
+    except sr.RequestError as e:
+        print("Could not request results; {0}".format(e))
+        result_text = "Could not request results"
+
+    # Update UI elements on the main thread
+    Clock.schedule_once(lambda dt: update_ui(detection_label, audio_to_text_button, result_text), 0)
+
+
 class Main(MDApp):
     DEBUG = False
     RAISE_ERROR = True
@@ -77,6 +97,10 @@ class Main(MDApp):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.dialog = None
+        self.stop_time = None
+        self.loading_screen = None
+        self.start_time = None
         self.word_section_content = None
         self.names_list = []
         self.is_listening = False
@@ -85,27 +109,7 @@ class Main(MDApp):
 
     def build(self):
         self.title = "SoundTouch"
-        Clock.schedule_interval(self.update_progress_bar, 0.1)
         return Builder.load_string(kv)
-
-    def show_loading_screen(self):
-        self.loading_screen = LoadingScreen()
-        self.root.add_widget(self.loading_screen)
-        self.start_time = time.time()  # Record the start time
-
-    def hide_loading_screen(self):
-        self.root.remove_widget(self.loading_screen)
-        self.stop_time = time.time()  # Record the stop time
-
-    def update_progress_bar(self, dt):
-        if hasattr(self, 'start_time') and hasattr(self, 'stop_time'):
-            elapsed_time = self.stop_time - self.start_time
-            if elapsed_time < 5:  # Adjust the duration as needed
-                progress = elapsed_time / 5  # Adjust the total duration as needed
-                self.loading_screen.ids.progress_bar.value = progress * 100
-            else:
-                # Loading is complete, hide the loading screen
-                self.hide_loading_screen()
 
     def add_name(self):
         close_button = MDFlatButton(text="Закрити", on_release=self.close_dialog)
@@ -241,7 +245,7 @@ class Main(MDApp):
             audio_to_text_button.text_color = (0, 0, 0, 1)
             audio_to_text_button.md_bg_color = (1, 1, 1, 1)
 
-            threading.Thread(target=self.recognize_speech, args=(detection_label, audio_to_text_button)).start()
+            threading.Thread(target=recognize_speech, args=(detection_label, audio_to_text_button)).start()
         else:
             audio_to_text_button.icon = "play"
             audio_to_text_button.icon_color = (1, 1, 1, 1)
@@ -249,30 +253,6 @@ class Main(MDApp):
             audio_to_text_button.text_color = (1, 1, 1, 1)
             audio_to_text_button.md_bg_color = (0, 0, 0, 1)
             # audio_to_text_button.disabled = False
-
-    def recognize_speech(self, detection_label, audio_to_text_button):
-        import speech_recognition as sr
-        recognizer = sr.Recognizer()
-
-        with sr.Microphone() as source:
-            recognizer.adjust_for_ambient_noise(source)
-            audio = recognizer.listen(source)
-
-        try:
-            text = recognizer.recognize_google(audio, language="uk-UA", show_all=False)
-            print("You said:", text)
-            # Limiting to 260 characters
-            if len(text) > 260:
-                text = text[:260] + "..."
-            result_text = text if text else "ніхуя не ясно"
-        except sr.UnknownValueError:
-            result_text = "ніхуя не ясно"
-        except sr.RequestError as e:
-            print("Could not request results; {0}".format(e))
-            result_text = "Could not request results"
-
-        # Update UI elements on the main thread
-        Clock.schedule_once(lambda dt: update_ui(detection_label, audio_to_text_button, result_text), 0)
 
     def start_text_to_audio(self):
         translation_text = self.root.ids.translation_input.text
