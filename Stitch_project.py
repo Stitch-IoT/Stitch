@@ -1,34 +1,34 @@
-import kivy.core.window
-from kaki.app import App
+import threading
 import time
+import kivy.core.window
+import plyer
+import speech_recognition as sr
+from kivy.clock import Clock
+from kivy.core.audio import SoundLoader
 from kivy.lang import Builder
 from kivymd.app import MDApp
-from kivymd.toast.kivytoast.kivytoast import toast
+from kivymd.toast import toast
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDFlatButton, MDIconButton
+from kivymd.uix.button import MDFlatButton
+from kivymd.uix.button import MDIconButton
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.floatlayout import MDFloatLayout
-from kivymd.uix.gridlayout import MDGridLayout
-from kivymd.uix.list import IRightBodyTouch
-from kivymd.uix.list import MDList, OneLineListItem, OneLineRightIconListItem
-from kivymd.uix.bottomnavigation import MDBottomNavigationItem
-from kivy.core.audio import SoundLoader
-import speech_recognition as sr
-import plyer
-import threading
-from kivy.clock import Clock
+from kivymd.uix.list import OneLineRightIconListItem
+from speech_recognition import WaitTimeoutError
 from kv_helpers import kv
 from text_to_speach import text_to_speech
-import time
-from speech_recognition import WaitTimeoutError
-from watchdog.observers import Observer
-from kivy.clock import Clock
-from kivymd.toast import toast
-from kivymd.uix.list import OneLineRightIconListItem
-from kivymd.uix.button import MDIconButton
 
 kivy.core.window.Window.size = (360, 600)
 
+from kivy.uix.image import Image
+
+class LoadingScreen(MDBoxLayout):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.orientation = 'vertical'
+        self.size_hint = (1, 1)
+        self.image = Image(source='lod.gif')  # Замість 'your_loading_gif.gif' використайте шлях до вашого GIF файлу
+        self.add_widget(self.image)
 
 class ScreenOne(MDBoxLayout):
     pass
@@ -50,6 +50,10 @@ class SettingsSectionContent(MDBoxLayout):
     pass
 
 
+class LoadingScreen(MDBoxLayout):
+    pass
+
+
 class Main(MDApp):
     DEBUG = False
     RAISE_ERROR = True
@@ -62,10 +66,31 @@ class Main(MDApp):
         self.names_list = []
         self.is_listening = False
         self.recognizer = sr.Recognizer()
+        self.thread = None
 
     def build(self):
         self.title = "SoundTouch"
+        Clock.schedule_interval(self.update_progress_bar, 0.1)
         return Builder.load_string(kv)
+
+    def show_loading_screen(self):
+        self.loading_screen = LoadingScreen()
+        self.root.add_widget(self.loading_screen)
+        self.start_time = time.time()  # Record the start time
+
+    def hide_loading_screen(self):
+        self.root.remove_widget(self.loading_screen)
+        self.stop_time = time.time()  # Record the stop time
+
+    def update_progress_bar(self, dt):
+        if hasattr(self, 'start_time') and hasattr(self, 'stop_time'):
+            elapsed_time = self.stop_time - self.start_time
+            if elapsed_time < 5:  # Adjust the duration as needed
+                progress = elapsed_time / 5  # Adjust the total duration as needed
+                self.loading_screen.ids.progress_bar.value = progress * 100
+            else:
+                # Loading is complete, hide the loading screen
+                self.hide_loading_screen()
 
     def add_name(self):
         close_button = MDFlatButton(text="Закрити", on_release=self.close_dialog)

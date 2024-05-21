@@ -1,4 +1,24 @@
 kv = """
+<LoadingScreen>:
+    orientation: "vertical"
+    spacing: "10dp"
+    padding: "20dp"
+    
+    MDLabel:
+        text: "Loading..."
+        halign: "center"
+        font_style: "H6"
+    
+    AsyncImage:
+        source: "lod.gif"  # Replace "loading.gif" with the path to your GIF file
+        anim_delay: 1/30  # Adjust the animation delay as needed
+
+    MDProgressBar:
+        id: progress_bar
+        size_hint_y: None
+        height: "20dp"
+        color: app.theme_cls.primary_color
+        
 <WordSectionContent>:
 	id: word_section_content
 	MDBoxLayout:
@@ -106,6 +126,9 @@ kv = """
         MDLabel:
             halign: "center"
             text: "lol kek"
+        AsyncImage:
+            source: "roll.gif" 
+            anim_delay: 1/30  
         
 
 <ScreenOne>:
