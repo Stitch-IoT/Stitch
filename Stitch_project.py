@@ -1,34 +1,24 @@
-import kivy.core.window
-from kaki.app import App
+import threading
 import time
+import kivy.core.window
+import plyer
+import speech_recognition as sr
+from kivy.clock import Clock
+from kivy.core.audio import SoundLoader
 from kivy.lang import Builder
 from kivymd.app import MDApp
-from kivymd.toast.kivytoast.kivytoast import toast
+from kivymd.toast import toast
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDFlatButton, MDIconButton
+from kivymd.uix.button import MDFlatButton
+from kivymd.uix.button import MDIconButton
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.floatlayout import MDFloatLayout
-from kivymd.uix.gridlayout import MDGridLayout
-from kivymd.uix.list import IRightBodyTouch
-from kivymd.uix.list import MDList, OneLineListItem, OneLineRightIconListItem
-from kivymd.uix.bottomnavigation import MDBottomNavigationItem
-from kivy.core.audio import SoundLoader
-import speech_recognition as sr
-import plyer
-import threading
-from kivy.clock import Clock
+from kivymd.uix.list import OneLineRightIconListItem
+from speech_recognition import WaitTimeoutError
 from kv_helpers import kv
 from text_to_speach import text_to_speech
-import time
-from speech_recognition import WaitTimeoutError
-from watchdog.observers import Observer
-from kivy.clock import Clock
-from kivymd.toast import toast
-from kivymd.uix.list import OneLineRightIconListItem
-from kivymd.uix.button import MDIconButton
 
 kivy.core.window.Window.size = (360, 600)
-
 
 class ScreenOne(MDBoxLayout):
     pass
@@ -50,6 +40,42 @@ class SettingsSectionContent(MDBoxLayout):
     pass
 
 
+def update_ui(detection_label, audio_to_text_button, result_text):
+    detection_label.text = result_text
+
+    audio_to_text_button.icon = "play"
+    audio_to_text_button.icon_color = (1, 1, 1, 1)
+    audio_to_text_button.text = "Почати"
+    audio_to_text_button.text_color = (1, 1, 1, 1)
+    audio_to_text_button.md_bg_color = (0, 0, 0, 1)
+    # Re-enable the button after recognition is done
+    # audio_to_text_button.disabled = False
+
+
+def recognize_speech(detection_label, audio_to_text_button):
+    recognizer = sr.Recognizer()
+
+    with sr.Microphone() as source:
+        recognizer.adjust_for_ambient_noise(source)
+        audio = recognizer.listen(source)
+
+    try:
+        text = recognizer.recognize_google(audio, language="uk-UA", show_all=False)
+        print("You said:", text)
+        # Limiting to 260 characters
+        if len(text) > 260:
+            text = text[:260] + "..."
+        result_text = text if text else "ніхуя не ясно"
+    except sr.UnknownValueError:
+        result_text = "ніхуя не ясно"
+    except sr.RequestError as e:
+        print("Could not request results; {0}".format(e))
+        result_text = "Could not request results"
+
+    # Update UI elements on the main thread
+    Clock.schedule_once(lambda dt: update_ui(detection_label, audio_to_text_button, result_text), 0)
+
+
 class Main(MDApp):
     DEBUG = False
     RAISE_ERROR = True
@@ -59,9 +85,15 @@ class Main(MDApp):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.dialog = None
+        self.stop_time = None
+        self.loading_screen = None
+        self.start_time = None
+        self.word_section_content = None
         self.names_list = []
         self.is_listening = False
         self.recognizer = sr.Recognizer()
+        self.thread = None
 
     def build(self):
         self.title = "SoundTouch"
@@ -194,66 +226,21 @@ class Main(MDApp):
         audio_to_text_button = self.root.ids.audio_to_text_button
 
         if audio_to_text_button.icon == "play":
-            # Disable the button to prevent multiple clicks
-            audio_to_text_button.disabled = True
+            # audio_to_text_button.disabled = True
             audio_to_text_button.icon = "square"
             audio_to_text_button.icon_color = (0, 0, 0, 1)
             audio_to_text_button.text = "Слухаю..."
             audio_to_text_button.text_color = (0, 0, 0, 1)
             audio_to_text_button.md_bg_color = (1, 1, 1, 1)
 
-            # Оновлюємо інтерфейс перед початком розпізнавання
-            Clock.schedule_once(lambda dt: self.recognize_speech(detection_label, audio_to_text_button), 0)
+            threading.Thread(target=recognize_speech, args=(detection_label, audio_to_text_button)).start()
         else:
             audio_to_text_button.icon = "play"
             audio_to_text_button.icon_color = (1, 1, 1, 1)
             audio_to_text_button.text = "Почати"
             audio_to_text_button.text_color = (1, 1, 1, 1)
             audio_to_text_button.md_bg_color = (0, 0, 0, 1)
-            # Re-enable the button after resetting it
-            audio_to_text_button.disabled = False
-
-    def recognize_speech(self, detection_label, audio_to_text_button):
-        import speech_recognition as sr
-        recognizer = sr.Recognizer()
-
-        with sr.Microphone() as source:
-            recognizer.adjust_for_ambient_noise(source)
-            audio = recognizer.listen(source)
-
-        try:
-            text = recognizer.recognize_google(audio, language="uk-UA", show_all=False)
-            print("You said:", text)
-            # Limiting to 260 characters
-            if len(text) > 260:
-                text = text[:260] + "..."
-            detection_label.text = text if text else "ніхуя не ясно"
-        except sr.UnknownValueError:
-            detection_label.text = "ніхуя не ясно"
-        except sr.RequestError as e:
-            print("Could not request results; {0}".format(e))
-            detection_label.text = "Could not request results"
-
-        # Повертаємо стан кнопки до початкового
-        audio_to_text_button.icon = "play"
-        audio_to_text_button.icon_color = (1, 1, 1, 1)
-        audio_to_text_button.text = "Почати"
-        audio_to_text_button.text_color = (1, 1, 1, 1)
-        audio_to_text_button.md_bg_color = (0, 0, 0, 1)
-        # Re-enable the button after recognition is done
-        audio_to_text_button.disabled = False
-
-    def change_detection_label(self, dt):
-        detection_label = self.root.ids.result_from_audio
-        audio_to_text_button = self.root.ids.audio_to_text_button
-
-        detection_label = self.root.ids.result_from_audio
-        detection_label.text = "Це приклад роботи нашої програми"
-        audio_to_text_button.icon = "play"
-        audio_to_text_button.text = "Почати"
-        audio_to_text_button.icon_color = 1, 1, 1, 1
-        audio_to_text_button.text_color = 1, 1, 1, 1
-        audio_to_text_button.md_bg_color = 0, 0, 0, 1
+            # audio_to_text_button.disabled = False
 
     def start_text_to_audio(self):
         translation_text = self.root.ids.translation_input.text
@@ -269,7 +256,7 @@ class Main(MDApp):
             tranlate_button.pos_hint = {"center_x": 0.9, "center_y": 0.5}
             new_list_item.add_widget(tranlate_button)
 
-            file = text_to_speech(translation_text)  # Capture the returned filename
+            file = text_to_speech(translation_text)
             toast("saying...", duration=4)
             self.play_audio(file)
 
@@ -311,11 +298,11 @@ class Main(MDApp):
             toast("Поле порожнє", duration=2)
 
         else:
-            text_to_audio_button.disabled = True  # Блокуємо кнопку перед очищенням поля
+            text_to_audio_button.disabled = True
 
             translation_input.text = ""
-            self.reset_button()  # Відновлюємо стан кнопки після очищення поля
-            text_to_audio_button.disabled = False  # Розблоковуємо кнопку після завершення очищення
+            self.reset_button()
+            text_to_audio_button.disabled = False
 
             text_to_audio_button.icon = "play"
             text_to_audio_button.text = "Відтворити"

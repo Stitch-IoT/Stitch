@@ -1,0 +1,13 @@
+certifi==2023.4.0
+charset-normalizer==3.1.0
+docutils==0.19
+idna==3.4
+Kivy==2.1.0
+kivymd==1.1.1
+plyer==2.1.0
+Pygments==2.15.1
+requests==2.28.2
+speechrecognition==3.9.0
+urllib3==1.26.15
+watchdog==3.0.0
+gTTS==2.2.2
