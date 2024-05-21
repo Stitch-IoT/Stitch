@@ -127,7 +127,7 @@ kv = """
             halign: "center"
             text: "lol kek"
         AsyncImage:
-            source: "roll.gif" 
+            source: "asserts/roll.gif" 
             anim_delay: 1/30  
         
 
