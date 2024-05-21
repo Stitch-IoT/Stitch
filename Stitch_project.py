@@ -20,18 +20,6 @@ from text_to_speach import text_to_speech
 
 kivy.core.window.Window.size = (360, 600)
 
-from kivy.uix.image import Image
-
-
-class LoadingScreen(MDBoxLayout):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.orientation = 'vertical'
-        self.size_hint = (1, 1)
-        self.image = Image(source='lod.gif')  # Замість 'your_loading_gif.gif' використайте шлях до вашого GIF файлу
-        self.add_widget(self.image)
-
-
 class ScreenOne(MDBoxLayout):
     pass
 
