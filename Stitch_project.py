@@ -58,36 +58,23 @@ def update_ui(detection_label, audio_to_text_button, result_text):
     # audio_to_text_button.disabled = False
 
 
-
-
-
-def record_audio(duration, samplerate):
-    print("Recording audio...")
-    recording = sd.rec(int(duration * samplerate), samplerate=samplerate, channels=1, dtype='int16')
-    sd.wait()
-    print("Recording complete.")
-    return recording
-
-def save_wav(file_name, samplerate, data):
-    wav.write(file_name, samplerate, data)
-
 def recognize_speech(detection_label, audio_to_text_button):
     recognizer = sr.Recognizer()
-
-    # Parameters for recording
-    duration = 5  # seconds
-    samplerate = 44100  # Hertz
-
-    # Record audio
-    audio_data = record_audio(duration, samplerate)
-    save_wav("output.wav", samplerate, audio_data)
-
-    # Load the recorded audio
-    with sr.AudioFile("output.wav") as source:
-        recognizer.adjust_for_ambient_noise(source)
-        audio = recognizer.record(source)
+    fs = 44100  # Sample rate
+    seconds = 4  # Duration of recording
 
     try:
+        # Record audio
+        myrecording = sd.rec(int(seconds * fs), samplerate=fs, channels=2, dtype='int16')
+        sd.wait()  # Wait until recording is finished
+
+        # Save the recording to a file
+        wav.write("asserts/output.wav", fs, myrecording)
+
+        # Use SpeechRecognition to process the audio
+        with sr.AudioFile("asserts/output.wav") as source:
+            audio = recognizer.record(source)
+
         text = recognizer.recognize_google(audio, language="uk-UA", show_all=False)
         print("You said:", text)
         # Limiting to 260 characters
@@ -99,6 +86,9 @@ def recognize_speech(detection_label, audio_to_text_button):
     except sr.RequestError as e:
         print("Could not request results; {0}".format(e))
         result_text = "Could not request results"
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        result_text = "An error occurred"
 
     # Update UI elements on the main thread
     Clock.schedule_once(lambda dt: update_ui(detection_label, audio_to_text_button, result_text), 0)
@@ -211,10 +201,10 @@ class Main(MDApp):
                 sd.wait()  # Wait until recording is finished
 
                 # Save the recording to a file
-                wav.write("output.wav", fs, myrecording)
+                wav.write("asserts/moutput.wav", fs, myrecording)
 
                 # Use SpeechRecognition to process the audio
-                with sr.AudioFile("output.wav") as source:
+                with sr.AudioFile("asserts/moutput.wav") as source:
                     audio = self.recognizer.record(source)
 
                 command = self.recognizer.recognize_google(audio, language="uk-UA")
