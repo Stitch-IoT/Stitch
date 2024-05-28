@@ -17,8 +17,14 @@ from kivymd.uix.list import OneLineRightIconListItem
 from speech_recognition import WaitTimeoutError
 from kv_helpers import kv
 from text_to_speach import text_to_speech
+import sounddevice as sd
+import numpy as np
+import scipy.io.wavfile as wav
+import speech_recognition as sr
+from kivy.clock import Clock
 
 kivy.core.window.Window.size = (360, 600)
+
 
 class ScreenOne(MDBoxLayout):
     pass
@@ -52,12 +58,34 @@ def update_ui(detection_label, audio_to_text_button, result_text):
     # audio_to_text_button.disabled = False
 
 
+
+
+
+def record_audio(duration, samplerate):
+    print("Recording audio...")
+    recording = sd.rec(int(duration * samplerate), samplerate=samplerate, channels=1, dtype='int16')
+    sd.wait()
+    print("Recording complete.")
+    return recording
+
+def save_wav(file_name, samplerate, data):
+    wav.write(file_name, samplerate, data)
+
 def recognize_speech(detection_label, audio_to_text_button):
     recognizer = sr.Recognizer()
 
-    with sr.Microphone() as source:
+    # Parameters for recording
+    duration = 5  # seconds
+    samplerate = 44100  # Hertz
+
+    # Record audio
+    audio_data = record_audio(duration, samplerate)
+    save_wav("output.wav", samplerate, audio_data)
+
+    # Load the recorded audio
+    with sr.AudioFile("output.wav") as source:
         recognizer.adjust_for_ambient_noise(source)
-        audio = recognizer.listen(source)
+        audio = recognizer.record(source)
 
     try:
         text = recognizer.recognize_google(audio, language="uk-UA", show_all=False)
@@ -174,14 +202,21 @@ class Main(MDApp):
     def listen_for_command(self):
         while self.is_listening:
             print("Listening started")
-            with sr.Microphone() as source:
-                self.recognizer.adjust_for_ambient_noise(source)
-                try:
-                    audio = self.recognizer.listen(source, timeout=4)
-                except WaitTimeoutError:
-                    continue
+            fs = 44100  # Sample rate
+            seconds = 4  # Duration of recording
 
             try:
+                # Record audio
+                myrecording = sd.rec(int(seconds * fs), samplerate=fs, channels=2, dtype='int16')
+                sd.wait()  # Wait until recording is finished
+
+                # Save the recording to a file
+                wav.write("output.wav", fs, myrecording)
+
+                # Use SpeechRecognition to process the audio
+                with sr.AudioFile("output.wav") as source:
+                    audio = self.recognizer.record(source)
+
                 command = self.recognizer.recognize_google(audio, language="uk-UA")
                 Clock.schedule_once(
                     lambda dt: toast(f"Отримано команду: {command}", duration=3), 0
@@ -202,10 +237,11 @@ class Main(MDApp):
                 pass
             except sr.RequestError as e:
                 pass
+            except Exception as e:
+                print(f"An error occurred: {e}")
 
             time.sleep(0.3)
             print("Listening stopped.")
-
     def general_detection(self):
         detecting_label = self.root.ids.detecting_label
         detecting_button = self.root.ids.detecting_button
