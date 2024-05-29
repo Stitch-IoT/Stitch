@@ -17,8 +17,11 @@ from kivymd.uix.list import OneLineRightIconListItem
 from speech_recognition import WaitTimeoutError
 from kv_helpers import kv
 from text_to_speach import text_to_speech
+from kivy_gradient import Gradient
+from kivy.graphics import Color, Rectangle
 
 kivy.core.window.Window.size = (360, 600)
+
 
 class ScreenOne(MDBoxLayout):
     pass
