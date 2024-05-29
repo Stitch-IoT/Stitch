@@ -1,4 +1,6 @@
 kv = """
+#:import get_color_from_hex kivy.utils.get_color_from_hex
+#:import Gradient kivy_gradient.Gradient
 <LoadingScreen>:
     orientation: "vertical"
     spacing: "10dp"
@@ -132,60 +134,70 @@ kv = """
         
 
 <ScreenOne>:
-    orientation: 'vertical'
-    MDLabel:
-        text : "SoundTouch"
-        font_size : "26dp"
-        valign : "bottom"
-        size_hint_y : .4
-        halign : "center"
+    canvas.before:
+        Color:
+            rgb: 1, 1, 1
+        Rectangle:
+            size: self.size
+            pos: self.pos
+            texture: Gradient.vertical(get_color_from_hex("e8d6ff"), get_color_from_hex("#faf7eb"))
+    MDBoxLayout:
+        orientation: 'vertical'
+        MDLabel:
+            text : "SoundTouch"
+            font_size : "26dp"
+            valign : "bottom"
+            size_hint_y : 1
+            halign : "center"
+    
+        MDGridLayout:
+            size_hint_y : 1.3
+            cols: 1
+            
+            MDRectangleFlatIconButton:
+            
+                padding : 30
+                icon : "file-word-box"				
+                text: 'Слова'
+                text_color: 0,0,0, 1  
+                line_color: 119/255, 22/255, 242/255, 1
+                icon_color: 0,0,0, 1
+                font_size: '18sp'  
+                icon_size: '24dp'
+                size_hint_x: 1
+                on_press: app.word_section()
+    
+    
+            MDRectangleFlatIconButton:
+            
+                padding : 30
+                icon : "volume-high"
+                text: 'Звуки'
+                text_color: 0,0,0,1 
+                md_bg_color: 0,0,0,0
+                line_color: 119/255, 22/255, 242/255, 1
+                icon_color: 0,0,0,1 
+                font_size: '18sp'  
+                icon_size: '24dp'  
+                size_hint_x: 1
+                on_press : app.sound_section()
+    
+    
+            MDRectangleFlatIconButton:
+                padding : 30
+                icon : "cog"
+                text: 'Налаштування'
+                text_color: 0,0,0,1 
+                md_bg_color: 0,0,0,0
+                line_color: 119/255, 22/255, 242/255, 1
+                icon_color: 0,0,0,1 
+                font_size: '18sp' 
+                icon_size: '24dp'  
+                size_hint_x: 1
+                on_press : app.settings_section()
 
-    MDGridLayout:
-        size_hint_y : .5
-        cols: 1
-        
-        MDRectangleFlatIconButton:
-            padding : 30
-            icon : "file-word-box"				
-            text: 'Слова'
-            text_color: 0,0,0, 1  
-            md_bg_color: 0,0,0,0
-            line_color: 0.75, 0.75, 0.75, 1
-            icon_color: 0,0,0, 1
-            font_size: '18sp'  
-            icon_size: '24dp'
-            size_hint_x: 1
-            on_press: app.word_section()
-
-
-        MDRectangleFlatIconButton:
-            padding : 30
-            icon : "volume-high"
-            text: 'Звуки'
-            text_color: 0,0,0,1 
-            md_bg_color: 0,0,0,0
-            line_color: 0.75, 0.75, 0.75, 1
-            icon_color: 0,0,0,1 
-            font_size: '18sp'  
-            icon_size: '24dp'  
-            size_hint_x: 1
-            on_press : app.sound_section()
-
-
-        MDRectangleFlatIconButton:
-            padding : 30
-            icon : "cog"
-            text: 'Налаштування'
-            text_color: 0,0,0,1 
-            md_bg_color: 0,0,0,0
-            line_color: 0.75, 0.75, 0.75, 1
-            icon_color: 0,0,0,1 
-            font_size: '18sp' 
-            icon_size: '24dp'  
-            size_hint_x: 1
-            on_press : app.settings_section()
-
-<Content>
+<Content>:
+    
     orientation: "vertical"
     spacing: "12dp"
     size_hint_y: None
@@ -204,8 +216,10 @@ kv = """
 
 MDFloatLayout:
 	MDBottomNavigation:
+        md_panel_color: "#ffe9ab"
+	    selected_color_background: 0, 0, 1, .4
 		text_color_normal: 0, 0, 0, 1
-		text_color_active: 57/255, 93/255, 203/255, 1
+		text_color_active: 142/255, 56/255, 255/255, 1
 		spacing : 0
 		id : bottom_nav
     	MDBottomNavigationItem:
@@ -220,7 +234,13 @@ MDFloatLayout:
 			id : screen2
 			name : "play"
 			MDFloatLayout:
-
+                canvas.before:
+                    Color:
+                        rgb: 1, 1, 1
+                    Rectangle:
+                        size: self.size
+                        pos: self.pos
+                        texture: Gradient.vertical(get_color_from_hex("e8d6ff"), get_color_from_hex("#faf7eb"))
 				MDLabel:
 					id : detecting_label
 					adaptive_size: True
