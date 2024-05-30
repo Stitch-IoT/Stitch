@@ -265,10 +265,19 @@ MDFloatLayout:
 		    name: "translation"
 
 		    MDBoxLayout:
+		        md_bg_color: "faf7eb"
 		    	orientation: 'vertical'
 		    	MDFloatLayout:
 
 			        MDRectangleFlatIconButton:
+			            canvas.before:
+                            Color:
+                                rgb: 1, 1, 1
+                            Rectangle:
+                                size: self.size
+                                pos: self.pos
+                                texture: Gradient.horizontal(get_color_from_hex("985ce0"), get_color_from_hex("#7915a3"))
+                                
 			        	id : audio_to_text_button
 			            text: 'Почати'
 			            font_size : "16sp"
@@ -280,7 +289,6 @@ MDFloatLayout:
 			            on_press: app.start_audio_to_text()
 			            theme_text_color: "Custom"
 			            text_color: 1, 1, 1, 1  
-			            md_bg_color: 0, 0, 0, 1 
 			            line_color: 0, 0, 0, 1
 
 			        MDLabel:
@@ -327,6 +335,13 @@ MDFloatLayout:
 
 
 			        MDRectangleFlatIconButton:
+			            canvas.before:
+                            Color:
+                                rgb: 1, 1, 1
+                            Rectangle:
+                                size: self.size
+                                pos: self.pos
+                                texture: Gradient.horizontal(get_color_from_hex("985ce0"), get_color_from_hex("#7915a3"))
 			        	id : text_to_audio_button
 			            text: 'Відтворити'
 			            font_size : "16sp"
@@ -338,7 +353,6 @@ MDFloatLayout:
 			            pos_hint: {"center_x": 0.5, "center_y": 0.25}
 			            theme_text_color: "Custom"
 			            text_color: 1, 1, 1, 1  
-			            md_bg_color: 0, 0, 0, 1 
 			            line_color: 0, 0, 0, 1
 
 
