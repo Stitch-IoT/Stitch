@@ -92,6 +92,7 @@ class Main(MDApp):
         self.start_time = None
         self.word_section_content = None
         self.names_list = []
+        self.configfile = None
         self.is_listening = False
         self.recognizer = sr.Recognizer()
         self.thread = None
@@ -104,38 +105,50 @@ class Main(MDApp):
         self.title = "SoundTouch"
         return Builder.load_string(kv)
 
+    def on_start(self):
+        self.word_section()
+        self.load_names_from_file()
+
     def add_name(self):
-        close_button = MDFlatButton(text="Закрити", on_release=self.close_dialog)
-        save_button = MDFlatButton(text="Зберегети", on_release=self.save_name)
-        self.dialog = CustomMDDialog(
-            title="Запишіть ім'я чи фразу",
-            type="custom",
-            content_cls=Content(),
-            buttons=[close_button, save_button],
-        )
-        self.dialog.open()
+        close_button = MDFlatButton(text='Закрити', on_release=self.close_dialog)
+        save_button = MDFlatButton(text='Зберегети', on_release=self.save_name)
+        self.dialog = MDDialog(title="Запишіть ім'я чи фразу", type="custom", content_cls=Content(),
+                               buttons=[close_button, save_button])
+        Clock.schedule_once(lambda dt: self.dialog.open(), 0.2)
+
+    def add_name(self):
+        close_button = MDFlatButton(text='Закрити', on_release=self.close_dialog)
+        save_button = MDFlatButton(text='Зберегети', on_release=self.save_name)
+        self.dialog = MDDialog(title="Запишіть ім'я чи фразу", type="custom", content_cls=Content(),
+                               buttons=[close_button, save_button])
+        Clock.schedule_once(lambda dt: self.dialog.open(), 0.2)
 
     def close_dialog(self, obj):
         self.dialog.dismiss()
 
     def save_name(self, obj):
+
+        self.configfile = open('config.txt', 'a')
+
         new_item_text = self.dialog.content_cls.ids.text_input.text
         if len(new_item_text) < 1:
             toast("Поле порожнє", duration=2)
+        elif new_item_text in self.names_list:
+            toast('Ім\'я вже існує', duration=2)
         else:
-            new_list_item = CustomOneLineRightIconListItem(text=new_item_text)
-
-            delete_name_button = MDIconButton(
-                icon="delete",
-                on_release=lambda x, item=new_list_item: self.delete_name(item),
-            )
+            new_list_item = OneLineRightIconListItem(text=new_item_text)
+            delete_name_button = MDIconButton(icon="delete",
+                                              on_release=lambda x, item=new_list_item: self.delete_name(item))
             delete_name_button.pos_hint = {"center_x": 0.9, "center_y": 0.5}
             new_list_item.add_widget(delete_name_button)
+
             self.names_list.append(new_item_text)
+            self.configfile.write(new_item_text + '\n')
             list_container = self.word_section_content.ids.list_of_names
             list_container.add_widget(new_list_item)
-            toast("Фраза збережена", duration=2)
 
+            toast("Фраза збережена", duration=2)
+            self.configfile.close()
             self.dialog.dismiss()
 
     def delete_name(self, list_item):
@@ -156,6 +169,13 @@ class Main(MDApp):
         list_container.remove_widget(list_item)
         self.dialog.dismiss()
         self.names_list.remove(list_item.text)
+        with open('config.txt', 'r') as f:
+            lines = f.readlines()
+        with open('config.txt', 'w') as f:
+            for line in lines:
+                if line.strip() != list_item.text:
+                    f.write(line)
+
         toast("Об'єкт видалено", duration=2)
 
     def cancel_deleting(self, obj):
@@ -366,6 +386,26 @@ class Main(MDApp):
         self.remove_home_screen_content()
         self.word_section_content = WordSectionContent()
         self.root.ids.home_screen.add_widget(self.word_section_content)
+
+    def load_names_from_file(self):
+        try:
+            self.configfile = open('config.txt', 'r')
+            for line in self.configfile:
+                line = line.strip()
+                if line:
+                    self.names_list.append(line)
+                    new_list_item = OneLineRightIconListItem(text=line)
+                    delete_name_button = MDIconButton(icon="delete",
+                                                      on_release=lambda x, item=new_list_item: self.delete_name(
+                                                          item))
+                    delete_name_button.pos_hint = {"center_x": 0.9, "center_y": 0.5}
+                    new_list_item.add_widget(delete_name_button)
+                    list_container = self.word_section_content.ids.list_of_names
+                    list_container.add_widget(new_list_item)
+            self.configfile.close()
+        except FileNotFoundError:
+            self.configfile = open('config.txt', 'w')
+            self.configfile.close()
 
     def sound_section(self):
         self.remove_home_screen_content()
