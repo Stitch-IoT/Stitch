@@ -22,7 +22,7 @@ kv = """
         color: app.theme_cls.primary_color
         
 <WordSectionContent>:
-    md_bg_color: "fafad7"
+    md_bg_color: "#FFFFE8"
 	id: word_section_content
 	MDBoxLayout:
         orientation: 'vertical'
@@ -45,7 +45,7 @@ kv = """
             on_press: app.add_name()
 
 <SoundSectionContent>:
-    md_bg_color: "e8d9fc"
+    md_bg_color: "F6E5FF"
 	id: sound_section_content
 	MDBoxLayout:
 		orientation: 'vertical'
@@ -142,7 +142,7 @@ kv = """
         Rectangle:
             size: self.size
             pos: self.pos
-            texture: Gradient.vertical(get_color_from_hex("fafad7"), get_color_from_hex("e5c0fa"))
+            texture: Gradient.vertical(get_color_from_hex("fafad7"), get_color_from_hex("FFFFE7"))
     MDFloatLayout:
         
         CustomLabel:
@@ -261,13 +261,13 @@ MDFloatLayout:
                     Rectangle:
                         size: self.size
                         pos: self.pos
-                        texture: Gradient.vertical(get_color_from_hex("e5c0fa"), get_color_from_hex("fafad7"))
+                        texture: Gradient.vertical(get_color_from_hex("#EDCDFF"), get_color_from_hex("#F6E5FF"))
 				CustomLabel:
 					id : detecting_label
 					adaptive_size: True
 					text : 'Почати розпізнавання'
 					pos_hint : {"center_x":.5, "center_y":.6}
-					font_size : "24dp"
+					font_size : "28dp"
 
 
 				MDIconButton:
@@ -286,7 +286,7 @@ MDFloatLayout:
 		    name: "translation"
 
 		    MDBoxLayout:
-		        md_bg_color: "fafad7"
+		        md_bg_color: "#FFFFE8"
 		    	orientation: 'vertical'
 		    	MDFloatLayout:
 
