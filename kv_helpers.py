@@ -6,7 +6,7 @@ kv = """
     spacing: "10dp"
     padding: "20dp"
     
-    MDLabel:
+    CustomLabel:
         text: "Loading..."
         halign: "center"
         font_style: "H6"
@@ -22,6 +22,7 @@ kv = """
         color: app.theme_cls.primary_color
         
 <WordSectionContent>:
+    md_bg_color: "fafad7"
 	id: word_section_content
 	MDBoxLayout:
         orientation: 'vertical'
@@ -44,6 +45,7 @@ kv = """
             on_press: app.add_name()
 
 <SoundSectionContent>:
+    md_bg_color: "e8d9fc"
 	id: sound_section_content
 	MDBoxLayout:
 		orientation: 'vertical'
@@ -51,22 +53,22 @@ kv = """
 			icon : "arrow-left"
 			size_hint_y : .1
 			on_press : app.back_to_home_screen()
-		MDLabel:
+		CustomLabel:
 			halign: "center"
 			text: "Виберіть звук"
-			size_hint_y : .1
+			size_hint_y : .08
 			font_size : "20sp"
 
 		MDGridLayout:
 			pos_hint: {"center_x": .5, "center_y": .5}
 			cols: 2
 			spacing: '3dp'
-			MDRectangleFlatIconButton:
+			CustomIconButton:
 				icon : "bell"				
 				text: 'Дзвінок'
 				text_color: 0,0,0, 1  
 				md_bg_color: 0,0,0,0
-				line_color: 0.85, 0.85, 0.85, 1
+			    line_color: 0,0,0,1
 				icon_color: 0,0,0, 1
 				font_size: '16sp'  
 				icon_size: '24dp'
@@ -75,12 +77,12 @@ kv = """
 				size_hint_y: .5
 
 
-			MDRectangleFlatIconButton:
+			CustomIconButton:
 				icon : "alarm-light"
 				text: 'Сигналізація'
 				text_color: 0,0,0,1 
 				md_bg_color: 0,0,0,0
-				line_color: 0.85, 0.85, 0.85, 1
+			    line_color: 0,0,0,1
 				icon_color: 0,0,0,1 
 				font_size: '16sp'  
 				icon_size: '24dp'  
@@ -88,12 +90,12 @@ kv = """
 				size_hint_y: .5
 
 
-			MDRectangleFlatIconButton:
+			CustomIconButton:
 				icon : "car"				
 				text: 'Сигнал авто'
 				text_color: 0,0,0, 1  
 				md_bg_color: 0,0,0,0
-				line_color: 0.85, 0.85, 0.85, 1
+			    line_color: 0,0,0,1
 				icon_color: 0,0,0, 1
 				font_size: '16sp'  
 				icon_size: '24dp'
@@ -101,12 +103,12 @@ kv = """
 				size_hint_y: .5
 
 
-			MDRectangleFlatIconButton:
+			CustomIconButton:
 				icon : "lock"				
 				text: 'Більше'
 				text_color: 0,0,0, 1  
 				md_bg_color: 0,0,0,0
-				line_color: 0.85, 0.85, 0.85, 1
+			    line_color: 0,0,0,1
 				icon_color: 0,0,0, 1
 				font_size: '16sp'  
 				icon_size: '24dp'
@@ -125,7 +127,7 @@ kv = """
 			size_hint_y : .1
 			on_press : app.back_to_home_screen()
 			
-        MDLabel:
+        CustomLabel:
             halign: "center"
             text: "lol kek"
         AsyncImage:
@@ -140,61 +142,81 @@ kv = """
         Rectangle:
             size: self.size
             pos: self.pos
-            texture: Gradient.vertical(get_color_from_hex("e8d6ff"), get_color_from_hex("#faf7eb"))
-    MDBoxLayout:
-        orientation: 'vertical'
-        MDLabel:
+            texture: Gradient.vertical(get_color_from_hex("fafad7"), get_color_from_hex("e5c0fa"))
+    MDFloatLayout:
+        
+        CustomLabel:
             text : "SoundTouch"
-            font_size : "26dp"
-            valign : "bottom"
-            size_hint_y : 1
+            font_size : "28dp"
+            size_hint_y : 0.3
             halign : "center"
-    
-        MDGridLayout:
-            size_hint_y : 1.3
-            cols: 1
+            pos_hint : {"center_y": .75}
             
-            MDRectangleFlatIconButton:
+    
             
-                padding : 30
-                icon : "file-word-box"				
-                text: 'Слова'
-                text_color: 0,0,0, 1  
-                line_color: 119/255, 22/255, 242/255, 1
-                icon_color: 0,0,0, 1
-                font_size: '18sp'  
-                icon_size: '24dp'
-                size_hint_x: 1
-                on_press: app.word_section()
-    
-    
-            MDRectangleFlatIconButton:
-            
-                padding : 30
-                icon : "volume-high"
-                text: 'Звуки'
-                text_color: 0,0,0,1 
-                md_bg_color: 0,0,0,0
-                line_color: 119/255, 22/255, 242/255, 1
-                icon_color: 0,0,0,1 
-                font_size: '18sp'  
-                icon_size: '24dp'  
-                size_hint_x: 1
-                on_press : app.sound_section()
-    
-    
-            MDRectangleFlatIconButton:
-                padding : 30
-                icon : "cog"
-                text: 'Налаштування'
-                text_color: 0,0,0,1 
-                md_bg_color: 0,0,0,0
-                line_color: 119/255, 22/255, 242/255, 1
-                icon_color: 0,0,0,1 
-                font_size: '18sp' 
-                icon_size: '24dp'  
-                size_hint_x: 1
-                on_press : app.settings_section()
+        CustomIconButton:
+            canvas.before:
+                Color:
+                    rgb: 1, 1, 1
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+                    texture: Gradient.horizontal(get_color_from_hex("985ce0"), get_color_from_hex("#7915a3"))
+            halign : "center"
+            padding : 30
+            icon : "file-word-box"				
+            text: 'Слова'
+            text_color: 1,1,1,1  
+            line_color: 0,0,0,1
+            icon_color: 1,1,1,1 
+            font_size: '18sp'  
+            icon_size: '24dp'
+            size_hint_x: 0.7
+            pos_hint: {"center_x": 0.5, "center_y": 0.50}
+            on_press: app.word_section()
+
+
+        CustomIconButton:
+            canvas.before:
+                Color:
+                    rgb: 1, 1, 1
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+                    texture: Gradient.horizontal(get_color_from_hex("985ce0"), get_color_from_hex("#7915a3"))
+            padding : 30
+            icon : "volume-high"
+            text: 'Звуки'
+            text_color: 1,1,1,1   
+            md_bg_color: 0,0,0,0
+            line_color: 0,0,0,1
+            icon_color: 1,1,1,1 
+            font_size: '18sp'  
+            icon_size: '24dp'  
+            size_hint_x: 0.7
+            pos_hint: {"center_x": 0.5, "center_y": 0.35}
+            on_press : app.sound_section()
+
+
+        CustomIconButton:
+            canvas.before:
+                Color:
+                    rgb: 1, 1, 1
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+                    texture: Gradient.horizontal(get_color_from_hex("bd92e8"), get_color_from_hex("b483e6"))
+            padding : 15
+            icon : "cog"
+            text: 'Налаштування'
+            text_color: 1,1,1,1 
+            line_color: 0,0,0,1
+            icon_color: 1,1,1,1
+            font_size: '18sp' 
+            icon_size: '24dp'  
+            size_hint_x: 1
+            pos_hint: {"center_x": 0.5}
+            on_press : app.settings_section()
 
 <Content>:
     
@@ -216,8 +238,7 @@ kv = """
 
 MDFloatLayout:
 	MDBottomNavigation:
-        md_panel_color: "#ffe9ab"
-	    selected_color_background: 0, 0, 1, .4
+        panel_color: "faecbe"
 		text_color_normal: 0, 0, 0, 1
 		text_color_active: 142/255, 56/255, 255/255, 1
 		spacing : 0
@@ -240,8 +261,8 @@ MDFloatLayout:
                     Rectangle:
                         size: self.size
                         pos: self.pos
-                        texture: Gradient.vertical(get_color_from_hex("e8d6ff"), get_color_from_hex("#faf7eb"))
-				MDLabel:
+                        texture: Gradient.vertical(get_color_from_hex("e5c0fa"), get_color_from_hex("fafad7"))
+				CustomLabel:
 					id : detecting_label
 					adaptive_size: True
 					text : 'Почати розпізнавання'
@@ -265,11 +286,11 @@ MDFloatLayout:
 		    name: "translation"
 
 		    MDBoxLayout:
-		        md_bg_color: "faf7eb"
+		        md_bg_color: "fafad7"
 		    	orientation: 'vertical'
 		    	MDFloatLayout:
 
-			        MDRectangleFlatIconButton:
+			        CustomIconButton:
 			            canvas.before:
                             Color:
                                 rgb: 1, 1, 1
@@ -291,14 +312,14 @@ MDFloatLayout:
 			            text_color: 1, 1, 1, 1  
 			            line_color: 0, 0, 0, 1
 
-			        MDLabel:
+			        CustomLabel:
 		    			text: "Результат:"
 		    			font_size : "16sp"
 		    			pos_hint: {"center_x": .52, "center_y": .6}
 		    			size_hint_x : None
 		    			bold: True
 
-		    		MDLabel:
+		    		CustomLabel:
 		    			id : result_from_audio
 		    			text : ""
 		    			pos_hint: {"center_x": .5, "center_y": .3}
@@ -329,12 +350,13 @@ MDFloatLayout:
 			            line_color_focus: "gray"
 
 			        MDFlatButton:
+			            font_name: 'BenguiatGothicC_Bold'
 			        	text: 'Очистити'
 			            pos_hint: {"center_x": 0.5, "center_y": 0.55}
 			            on_press : app.clear_text_field()
 
 
-			        MDRectangleFlatIconButton:
+			        CustomIconButton:
 			            canvas.before:
                             Color:
                                 rgb: 1, 1, 1

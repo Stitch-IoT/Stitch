@@ -10,7 +10,7 @@ from kivy.utils import get_color_from_hex
 from kivymd.app import MDApp
 from kivymd.toast import toast
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDFlatButton
+from kivymd.uix.button import MDFlatButton, MDRectangleFlatIconButton
 from kivymd.uix.button import MDIconButton
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.floatlayout import MDFloatLayout
@@ -20,6 +20,10 @@ from kv_helpers import kv
 from text_to_speach import text_to_speech
 from kivy_gradient import Gradient
 from kivy.graphics import Color, Rectangle
+from kivymd.uix.label import MDLabel
+from kivy.core.text import LabelBase
+from kivy.resources import resource_add_path
+
 
 kivy.core.window.Window.size = (360, 600)
 
@@ -44,23 +48,33 @@ class SettingsSectionContent(MDBoxLayout):
     pass
 
 
-# def update_ui(detection_label, audio_to_text_button, result_text):
-#     detection_label.text = result_text
-#     audio_to_text_button.icon = "play"
-#     audio_to_text_button.icon_color = (1, 1, 1, 1)
-#     audio_to_text_button.text = "Почати"
-#     audio_to_text_button.text_color = (1, 1, 1, 1)
-#     audio_to_text_button.canvas.before.clear()
-#
-#     with audio_to_text_button.canvas.before:
-#         Color(1, 1, 1, 1)  # Set the color to white
-#         Rectangle(
-#             size=audio_to_text_button.size,
-#             pos=audio_to_text_button.pos,
-#             texture=Gradient.horizontal(
-#                 get_color_from_hex("985ce0"), get_color_from_hex("7915a3")
-#             ),
-#         )
+class CustomLabel(MDLabel):
+    font_name = 'BenguiatGothicC_Bold'
+
+
+class CustomIconButton(MDRectangleFlatIconButton):
+    font_name = 'BenguiatGothicC_Bold'
+
+
+class CustomMDDialog(MDDialog):
+    def __init__(self, **kwargs):
+        title = kwargs.pop('title', '')
+        super().__init__(**kwargs)
+        self.font_name = 'BenguiatGothicC_Bold'
+
+        # Set the font for the title of the dialog
+        self.title = "[font=BenguiatGothicC_Bold]{}[/font]".format(title)
+        for button in self.buttons:
+            button.font_name = 'BenguiatGothicC_Bold'
+
+
+class CustomOneLineRightIconListItem(OneLineRightIconListItem):
+    font_name = 'BenguiatGothicC_Bold'  # Define the font_name attribute
+
+    def on_kv_post(self, base_widget):
+        super().on_kv_post(base_widget)
+        self.ids._lbl_primary.font_name = self.font_name  # Set the font for the primary label
+
 
 
 class Main(MDApp):
@@ -83,6 +97,8 @@ class Main(MDApp):
         self.thread = None
         self.audio_to_text_button_state = None
         self.text_to_audio_button_state = None
+        resource_add_path('asserts/BenguiatGothicC_Bold.ttf')
+        LabelBase.register(name='BenguiatGothicC_Bold', fn_regular='asserts/BenguiatGothicC_Bold.ttf')
 
     def build(self):
         self.title = "SoundTouch"
@@ -91,7 +107,7 @@ class Main(MDApp):
     def add_name(self):
         close_button = MDFlatButton(text="Закрити", on_release=self.close_dialog)
         save_button = MDFlatButton(text="Зберегети", on_release=self.save_name)
-        self.dialog = MDDialog(
+        self.dialog = CustomMDDialog(
             title="Запишіть ім'я чи фразу",
             type="custom",
             content_cls=Content(),
@@ -107,7 +123,7 @@ class Main(MDApp):
         if len(new_item_text) < 1:
             toast("Поле порожнє", duration=2)
         else:
-            new_list_item = OneLineRightIconListItem(text=new_item_text)
+            new_list_item = CustomOneLineRightIconListItem(text=new_item_text)
 
             delete_name_button = MDIconButton(
                 icon="delete",
@@ -130,7 +146,7 @@ class Main(MDApp):
             text="Підтвердити",
             on_release=lambda x, item=list_item: self.admit_deleting(item),
         )
-        self.dialog = MDDialog(
+        self.dialog = CustomMDDialog(
             title="Видалити?", buttons=[cancel_deleting_button, admit_deleting_button]
         )
         self.dialog.open()
