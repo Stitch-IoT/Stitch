@@ -6,10 +6,11 @@ import speech_recognition as sr
 from kivy.clock import Clock
 from kivy.core.audio import SoundLoader
 from kivy.lang import Builder
+from kivy.utils import get_color_from_hex
 from kivymd.app import MDApp
 from kivymd.toast import toast
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDFlatButton
+from kivymd.uix.button import MDFlatButton, MDRectangleFlatIconButton
 from kivymd.uix.button import MDIconButton
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.floatlayout import MDFloatLayout
@@ -19,6 +20,10 @@ from kv_helpers import kv
 from text_to_speach import text_to_speech
 from kivy_gradient import Gradient
 from kivy.graphics import Color, Rectangle
+from kivymd.uix.label import MDLabel
+from kivy.core.text import LabelBase
+from kivy.resources import resource_add_path
+
 
 kivy.core.window.Window.size = (360, 600)
 
@@ -43,40 +48,33 @@ class SettingsSectionContent(MDBoxLayout):
     pass
 
 
-def update_ui(detection_label, audio_to_text_button, result_text):
-    detection_label.text = result_text
-
-    audio_to_text_button.icon = "play"
-    audio_to_text_button.icon_color = (1, 1, 1, 1)
-    audio_to_text_button.text = "Почати"
-    audio_to_text_button.text_color = (1, 1, 1, 1)
-    audio_to_text_button.md_bg_color = (0, 0, 0, 1)
-    # Re-enable the button after recognition is done
-    # audio_to_text_button.disabled = False
+class CustomLabel(MDLabel):
+    font_name = 'BenguiatGothicC_Bold'
 
 
-def recognize_speech(detection_label, audio_to_text_button):
-    recognizer = sr.Recognizer()
+class CustomIconButton(MDRectangleFlatIconButton):
+    font_name = 'BenguiatGothicC_Bold'
 
-    with sr.Microphone() as source:
-        recognizer.adjust_for_ambient_noise(source)
-        audio = recognizer.listen(source)
 
-    try:
-        text = recognizer.recognize_google(audio, language="uk-UA", show_all=False)
-        print("You said:", text)
-        # Limiting to 260 characters
-        if len(text) > 260:
-            text = text[:260] + "..."
-        result_text = text if text else "ніхуя не ясно"
-    except sr.UnknownValueError:
-        result_text = "ніхуя не ясно"
-    except sr.RequestError as e:
-        print("Could not request results; {0}".format(e))
-        result_text = "Could not request results"
+class CustomMDDialog(MDDialog):
+    def __init__(self, **kwargs):
+        title = kwargs.pop('title', '')
+        super().__init__(**kwargs)
+        self.font_name = 'BenguiatGothicC_Bold'
 
-    # Update UI elements on the main thread
-    Clock.schedule_once(lambda dt: update_ui(detection_label, audio_to_text_button, result_text), 0)
+        # Set the font for the title of the dialog
+        self.title = "[font=BenguiatGothicC_Bold]{}[/font]".format(title)
+        for button in self.buttons:
+            button.font_name = 'BenguiatGothicC_Bold'
+
+
+class CustomOneLineRightIconListItem(OneLineRightIconListItem):
+    font_name = 'BenguiatGothicC_Bold'  # Define the font_name attribute
+
+    def on_kv_post(self, base_widget):
+        super().on_kv_post(base_widget)
+        self.ids._lbl_primary.font_name = self.font_name  # Set the font for the primary label
+
 
 
 class Main(MDApp):
@@ -97,6 +95,10 @@ class Main(MDApp):
         self.is_listening = False
         self.recognizer = sr.Recognizer()
         self.thread = None
+        self.audio_to_text_button_state = None
+        self.text_to_audio_button_state = None
+        resource_add_path('asserts/BenguiatGothicC_Bold.ttf')
+        LabelBase.register(name='BenguiatGothicC_Bold', fn_regular='asserts/BenguiatGothicC_Bold.ttf')
 
     def build(self):
         self.title = "SoundTouch"
@@ -105,7 +107,7 @@ class Main(MDApp):
     def add_name(self):
         close_button = MDFlatButton(text="Закрити", on_release=self.close_dialog)
         save_button = MDFlatButton(text="Зберегети", on_release=self.save_name)
-        self.dialog = MDDialog(
+        self.dialog = CustomMDDialog(
             title="Запишіть ім'я чи фразу",
             type="custom",
             content_cls=Content(),
@@ -121,7 +123,7 @@ class Main(MDApp):
         if len(new_item_text) < 1:
             toast("Поле порожнє", duration=2)
         else:
-            new_list_item = OneLineRightIconListItem(text=new_item_text)
+            new_list_item = CustomOneLineRightIconListItem(text=new_item_text)
 
             delete_name_button = MDIconButton(
                 icon="delete",
@@ -144,7 +146,7 @@ class Main(MDApp):
             text="Підтвердити",
             on_release=lambda x, item=list_item: self.admit_deleting(item),
         )
-        self.dialog = MDDialog(
+        self.dialog = CustomMDDialog(
             title="Видалити?", buttons=[cancel_deleting_button, admit_deleting_button]
         )
         self.dialog.open()
@@ -224,26 +226,70 @@ class Main(MDApp):
             detecting_label.pos_hint = {"center_x": 0.5, "center_y": 0.6}
             detecting_button.icon = "play"
 
-    def start_audio_to_text(self):
+    def reset_att_button(self, result_text=""):
+        """att = audio to text"""
+        self.audio_to_text_button_state = None
         detection_label = self.root.ids.result_from_audio
+        detection_label.text = result_text
+        audio_to_text_button = self.root.ids.audio_to_text_button
+        audio_to_text_button.icon = "play"
+        audio_to_text_button.text = "Почати"
+        audio_to_text_button.icon_color = (1, 1, 1, 1)
+        audio_to_text_button.text_color = (1, 1, 1, 1)
+        audio_to_text_button.md_bg_color = (0, 0, 0, 0)
+
+        audio_to_text_button.canvas.before.clear()
+
+        with audio_to_text_button.canvas.before:
+            Color(1, 1, 1, 1)
+            Rectangle(
+                size=audio_to_text_button.size,
+                pos=audio_to_text_button.pos,
+                texture=Gradient.horizontal(
+                    get_color_from_hex("985ce0"), get_color_from_hex("7915a3")
+                ),
+            )
+
+    def recognize_speech(self, detection_label, audio_to_text_button):
+        recognizer = sr.Recognizer()
+
+        with sr.Microphone() as source:
+            recognizer.adjust_for_ambient_noise(source)
+            audio = recognizer.listen(source)
+
+        try:
+            text = recognizer.recognize_google(audio, language="uk-UA", show_all=False)
+            print("You said:", text)
+            # Limiting to 260 characters
+            if len(text) > 260:
+                text = text[:260] + "..."
+            result_text = text if text else "ніхуя не ясно"
+        except sr.UnknownValueError:
+            result_text = "ніхуя не ясно"
+        except sr.RequestError as e:
+            print("Could not request results; {0}".format(e))
+            result_text = "Could not request results"
+
+        Clock.schedule_once(lambda dt: self.reset_att_button(result_text), 0)
+
+    def start_audio_to_text(self):
+
+        detection_label = self.root.ids.result_from_audio
+        detection_label.text = ""
         audio_to_text_button = self.root.ids.audio_to_text_button
 
-        if audio_to_text_button.icon == "play":
-            # audio_to_text_button.disabled = True
+        if self.audio_to_text_button_state is None:
+            self.audio_to_text_button_state = True
             audio_to_text_button.icon = "square"
             audio_to_text_button.icon_color = (0, 0, 0, 1)
             audio_to_text_button.text = "Слухаю..."
             audio_to_text_button.text_color = (0, 0, 0, 1)
             audio_to_text_button.md_bg_color = (1, 1, 1, 1)
 
-            threading.Thread(target=recognize_speech, args=(detection_label, audio_to_text_button)).start()
+            threading.Thread(target=self.recognize_speech, args=(detection_label, audio_to_text_button)).start()
         else:
-            audio_to_text_button.icon = "play"
-            audio_to_text_button.icon_color = (1, 1, 1, 1)
-            audio_to_text_button.text = "Почати"
-            audio_to_text_button.text_color = (1, 1, 1, 1)
-            audio_to_text_button.md_bg_color = (0, 0, 0, 1)
-            # audio_to_text_button.disabled = False
+            self.audio_to_text_button_state = None
+            self.reset_att_button()
 
     def start_text_to_audio(self):
         translation_text = self.root.ids.translation_input.text
@@ -260,28 +306,38 @@ class Main(MDApp):
             new_list_item.add_widget(tranlate_button)
 
             file = text_to_speech(translation_text)
-            toast("saying...", duration=4)
             self.play_audio(file)
 
             if text_to_audio_button.icon == "play":
                 text_to_audio_button.icon = "square"
                 text_to_audio_button.icon_color = (0, 0, 0, 1)
-                text_to_audio_button.text = "Відтворюється..."
+                text_to_audio_button.text = "Звучить..."
                 text_to_audio_button.text_color = (0, 0, 0, 1)
                 text_to_audio_button.md_bg_color = (1, 1, 1, 1)
-                text_to_audio_button.disabled = True  # Блокуємо кнопку
+
 
             else:
-                self.reset_button()
+                self.reset_tta_button()
 
-    def reset_button(self):
+    def reset_tta_button(self):
+        """tta = text to audio"""
         text_to_audio_button = self.root.ids.text_to_audio_button
         text_to_audio_button.icon = "play"
         text_to_audio_button.text = "Відтворити"
         text_to_audio_button.icon_color = (1, 1, 1, 1)
         text_to_audio_button.text_color = (1, 1, 1, 1)
-        text_to_audio_button.md_bg_color = (0, 0, 0, 1)
-        text_to_audio_button.disabled = False  # Розблоковуємо кнопку
+        text_to_audio_button.md_bg_color = (0, 0, 0, 0)  # Set background color to transparent
+
+        text_to_audio_button.canvas.before.clear()
+        with text_to_audio_button.canvas.before:
+            Color(1, 1, 1, 1)
+            Rectangle(
+                size=text_to_audio_button.size,
+                pos=text_to_audio_button.pos,
+                texture=Gradient.horizontal(
+                    get_color_from_hex("985ce0"), get_color_from_hex("7915a3")
+                ),
+            )
 
     def play_audio(self, filename):
         sound = SoundLoader.load(filename)
@@ -290,28 +346,18 @@ class Main(MDApp):
             sound.play()
 
     def on_audio_complete(self, sound):
-        self.reset_button()
-        # toast("тут можна якись текст бахнути", duration=2)
+        self.reset_att_button()
 
     def clear_text_field(self):
         translation_input = self.root.ids.translation_input
-        text_to_audio_button = self.root.ids.text_to_audio_button
 
         if len(translation_input.text) < 1:
             toast("Поле порожнє", duration=2)
 
         else:
-            text_to_audio_button.disabled = True
-
             translation_input.text = ""
-            self.reset_button()
-            text_to_audio_button.disabled = False
+            self.reset_tta_button()
 
-            text_to_audio_button.icon = "play"
-            text_to_audio_button.text = "Відтворити"
-            text_to_audio_button.icon_color = 1, 1, 1, 1
-            text_to_audio_button.text_color = 1, 1, 1, 1
-            text_to_audio_button.md_bg_color = 0, 0, 0, 1
 
     def added_name(self, item):
         pass
